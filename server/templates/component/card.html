@@ -1,0 +1,44 @@
+{% load staticfiles %}
+<div class="row">
+  <div class="col s12">
+    <div class="card white">
+      <div class="card-content">
+
+        <div class="left">
+          <img src="{% static 'images/user.png' %}" width="64"/>
+        </div>
+        <div style="margin-left:84px;">
+          <a href="#"><span class="card-title">山田太郎</span></a>
+
+          <p>{{ memo.updated_at }}</p>
+        </div>
+
+        <h5><b>{{ memo.title }}</b></h5>
+
+        <p>
+          {{ memo.event_date }} {{ memo.start_time }}-{{ memo.end_time }} {{ memo.place }}
+        </p>
+        <h5><b>出席者</b></h5>
+
+        <p>
+          Google: 佐藤、内藤、伊藤
+        </p>
+
+        <p>
+          TTT: 坂口、藤原、高橋、斎藤
+        </p>
+        <h5><b>アジェンダ</b></h5>
+        <ul>
+          {% for agenda in memo.agenda_set.all %}
+          <li>{{ agenda.title }}</li>
+          {% endfor %}
+        </ul>
+        <a href="#">続きを読む</a>
+      </div>
+      <div class="card-action right-align valign-wrapper">
+        <a href="#"><img src="{% static 'images/nikukyu.png' %}" width="48"/></a>
+        <span>5</span>
+      </div>
+    </div>
+  </div>
+</div>

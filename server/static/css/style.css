@@ -1,0 +1,68 @@
+/* Custom Stylesheet */
+/**
+ * Use this file to override Materialize files so you can update
+ * the core Materialize files in the future
+ *
+ * Made By MaterializeCSS.com
+ */
+ html, body {
+   background-color: #fafafa;
+   height:100%;
+   margin:0;
+   /*background-color: #e9eaed;*/
+ }
+ /*
+.container {
+  width: 960px;
+}*/
+
+.container {
+  margin: 0 auto;
+  max-width: 100%;
+  width: 100%;
+}
+
+@media only screen and (min-width: 601px) {
+  .container {
+    width: 95%;
+  }
+}
+
+@media only screen and (min-width: 993px) {
+  .container {
+    width: 95%;
+  }
+}
+
+nav {
+  height: 40px;
+  line-height: 40px;
+}
+
+nav i, nav [class^="mdi-"], nav [class*="mdi-"], nav i.material-icons {
+    height: 40px;
+    line-height: 40px;
+}
+
+nav .button-collapse i {
+    height: 40px;
+    line-height: 40px;
+}
+
+nav .brand-logo {
+    font-size: 1.6rem;
+}
+
+@media only screen and (min-width: 601px){
+    nav, nav .nav-wrapper i, nav a.button-collapse, nav a.button-collapse i {
+        height: 40px;
+        line-height: 40px;
+    }
+}
+
+.icon-block {
+  padding: 0 15px;
+}
+.icon-block .material-icons {
+	font-size: inherit;
+}

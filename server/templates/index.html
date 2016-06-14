@@ -1,63 +1,309 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <link rel="stylesheet" type="text/css" href="{{ static_url('css/jquery.ui.chatbox.css') }}"/>
-  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-  <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
-  <script src="{{ static_url('js/jquery.ui.chatbox.js') }}"></script>
+{% extends "base.html" %}
 
-  <script>
-        var socket = new WebSocket('ws://' + location.host + '/chat');
+{% block content %}
+<div class="container">
+  <div class="section">
+    <div class="row">
 
-        function sendAction(user_id, msg) {
+      {% include 'component/menu.html' %}
 
-            var message = {
-                id: user_id,
-                message: msg
-            };
+      <div class="col s12 l9">
 
-            socket.send(JSON.stringify(message));
-        }
+        <!-- chart -->
+        <div id="chart" class="row">
+          <div class="col s12 m8 l9">
 
-        socket.onopen = function(event) {
-        }
+            <div class="sample-chart-wrapper">
+              <div id="morris-line" class="graph"
+                   style="position: relative; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
+                <svg height="342" version="1.1" width="1042" xmlns="http://www.w3.org/2000/svg"
+                     style="overflow: hidden; position: relative; left: -0.578125px; top: -0.515625px;">
+                  <desc style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">Created with Raphaël 2.1.2</desc>
+                  <defs style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></defs>
+                  <text x="46.953125" y="311" text-anchor="end" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">0</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M59.453125,311.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="46.953125" y="239.5" text-anchor="end" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">1,000</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M59.453125,239.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="46.953125" y="168" text-anchor="end" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2,000</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M59.453125,168.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="46.953125" y="96.50000000000003" text-anchor="end" font="10px &quot;Arial&quot;"
+                        stroke="none" fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.250000000000028" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">3,000</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M59.453125,96.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="46.953125" y="25" text-anchor="end" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">4,000</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M59.453125,25.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="906.1981473214286" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2011</tspan>
+                  </text>
+                  <text x="739.7673809523809" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2010</tspan>
+                  </text>
+                  <text x="573.3366145833334" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2009</tspan>
+                  </text>
+                  <text x="406.44987351190474" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;"
+                        stroke="none" fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2008</tspan>
+                  </text>
+                  <text x="240.01910714285714" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;"
+                        stroke="none" fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2007</tspan>
+                  </text>
+                  <text x="73.58834077380952" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2006</tspan>
+                  </text>
+                  <path fill="none" stroke="#7a92a3"
+                        d="M392.31465773809526,266.67C434.0363430059524,265.579625,517.4797135416667,262.80968467852256,559.2013988095239,262.3085C600.8090904017857,261.8086846785225,684.0244735863096,262.48725,725.6321651785714,262.666C767.2398567708333,262.84475,850.4552399553572,262.9068214285714,892.0629315476191,263.7385C902.3223623511905,263.94357142857143,922.8412239583333,266.53014285714283,933.1006547619047,266.813C943.5880729166666,267.10214285714284,964.5629092261904,266.401875,975.0503273809524,266.0265C985.5377455357143,265.651125,1006.5125818452381,264.364125,1017,263.81"
+                        stroke-width="3" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <path fill="none" stroke="#0b62a4"
+                        d="M59.453125,75.83650000000003C101.06081659226192,76.62300000000002,184.27619977678572,78.41943750000002,225.88389136904763,78.98250000000002C267.4915829613095,79.54556250000002,350.70696614583335,79.537725376197,392.31465773809526,80.34100000000001C434.0363430059524,81.146475376197,517.4797135416667,84.92526504787963,559.2013988095239,85.41750000000002C600.8090904017857,85.90839004787964,684.0244735863096,85.08681250000001,725.6321651785714,84.27350000000001C767.2398567708333,83.46018750000002,850.4552399553572,80.31625000000003,892.0629315476191,78.91100000000003C902.3223623511905,78.56450000000002,922.8412239583333,78.194625,933.1006547619047,77.26650000000001C943.5880729166666,76.31775,964.5629092261904,72.636875,975.0503273809524,71.40350000000001C985.5377455357143,70.17012500000001,1006.5125818452381,68.40050000000002,1017,67.39950000000002"
+                        stroke-width="3" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <circle cx="392.31465773809526" cy="266.67" r="7" fill="#7a92a3" stroke="#ffffff" stroke-width="1"
+                          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="559.2013988095239" cy="262.3085" r="4" fill="#7a92a3" stroke="#ffffff" stroke-width="1"
+                          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="725.6321651785714" cy="262.666" r="4" fill="#7a92a3" stroke="#ffffff" stroke-width="1"
+                          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="892.0629315476191" cy="263.7385" r="4" fill="#7a92a3" stroke="#ffffff" stroke-width="1"
+                          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="933.1006547619047" cy="266.813" r="4" fill="#7a92a3" stroke="#ffffff" stroke-width="1"
+                          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="975.0503273809524" cy="266.0265" r="4" fill="#7a92a3" stroke="#ffffff" stroke-width="1"
+                          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="1017" cy="263.81" r="4" fill="#7a92a3" stroke="#ffffff" stroke-width="1"
+                          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="59.453125" cy="75.83650000000003" r="4" fill="#0b62a4" stroke="#ffffff" stroke-width="1"
+                          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="225.88389136904763" cy="78.98250000000002" r="4" fill="#0b62a4" stroke="#ffffff"
+                          stroke-width="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="392.31465773809526" cy="80.34100000000001" r="7" fill="#0b62a4" stroke="#ffffff"
+                          stroke-width="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="559.2013988095239" cy="85.41750000000002" r="4" fill="#0b62a4" stroke="#ffffff"
+                          stroke-width="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="725.6321651785714" cy="84.27350000000001" r="4" fill="#0b62a4" stroke="#ffffff"
+                          stroke-width="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="892.0629315476191" cy="78.91100000000003" r="4" fill="#0b62a4" stroke="#ffffff"
+                          stroke-width="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="933.1006547619047" cy="77.26650000000001" r="4" fill="#0b62a4" stroke="#ffffff"
+                          stroke-width="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="975.0503273809524" cy="71.40350000000001" r="4" fill="#0b62a4" stroke="#ffffff"
+                          stroke-width="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                  <circle cx="1017" cy="67.39950000000002" r="4" fill="#0b62a4" stroke="#ffffff" stroke-width="1"
+                          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                </svg>
+              </div>
+            </div>
+          </div>
 
-        socket.onclose = function() {
-        }
 
-        socket.onmessage = function(event) {
-            var data = JSON.parse(event.data);
-            console.log(data);
-            if ('messages' in data) {
-                var messages = data.messages;
-                for (var i = 0; i < messages.length; i++) {
-                    $("#chat_div").chatbox("option", "boxManager").addMsg(messages[i].id, messages[i].message);
-                }
-            } else {
-                $("#chat_div").chatbox("option", "boxManager").addMsg(data.id, data.message);
-            }
-        }
+          <div class="col s12 m8 l9">
+            <div class="sample-chart-wrapper">
+              <div id="morris-bar" class="graph"
+                   style="position: relative; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
+                <svg height="342" version="1.1" width="1042" xmlns="http://www.w3.org/2000/svg"
+                     style="overflow: hidden; position: relative; left: -0.578125px; top: -0.28125px;">
+                  <desc style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">Created with Raphaël 2.1.2</desc>
+                  <defs style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></defs>
+                  <text x="20.421875" y="311" text-anchor="end" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">0</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M32.921875,311.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="20.421875" y="239.5" text-anchor="end" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">1</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M32.921875,239.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="20.421875" y="168" text-anchor="end" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M32.921875,168.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="20.421875" y="96.5" text-anchor="end" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">3</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M32.921875,96.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="20.421875" y="25" text-anchor="end" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">4</tspan>
+                  </text>
+                  <path fill="none" stroke="#aaaaaa" d="M32.921875,25.5H1017" stroke-width="0.5"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                  <text x="893.990234375" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2011 Q4</tspan>
+                  </text>
+                  <text x="647.970703125" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2011 Q3</tspan>
+                  </text>
+                  <text x="401.951171875" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2011 Q2</tspan>
+                  </text>
+                  <text x="155.931640625" y="323.5" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none"
+                        fill="#888888"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: normal; font-family: sans-serif;"
+                        font-size="12px" font-family="sans-serif" font-weight="normal" transform="matrix(1,0,0,1,0,6)">
+                    <tspan dy="4.25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2011 Q1</tspan>
+                  </text>
+                  <rect x="63.67431640625" y="96.5" width="59.5048828125" height="214.5" r="0" rx="0" ry="0"
+                        fill="#0b62a4" stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="126.17919921875" y="168" width="59.5048828125" height="143" r="0" rx="0" ry="0"
+                        fill="#7a92a3" stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="188.68408203125" y="96.5" width="59.5048828125" height="214.5" r="0" rx="0" ry="0"
+                        fill="#4da74d" stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="309.69384765625" y="168" width="59.5048828125" height="143" r="0" rx="0" ry="0"
+                        fill="#0b62a4" stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="434.70361328125" y="239.5" width="59.5048828125" height="71.5" r="0" rx="0" ry="0"
+                        fill="#4da74d" stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="555.71337890625" y="311" width="59.5048828125" height="0" r="0" rx="0" ry="0" fill="#0b62a4"
+                        stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="618.21826171875" y="168" width="59.5048828125" height="143" r="0" rx="0" ry="0"
+                        fill="#7a92a3" stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="680.72314453125" y="25" width="59.5048828125" height="286" r="0" rx="0" ry="0" fill="#4da74d"
+                        stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="801.73291015625" y="168" width="59.5048828125" height="143" r="0" rx="0" ry="0"
+                        fill="#0b62a4" stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="864.23779296875" y="25" width="59.5048828125" height="286" r="0" rx="0" ry="0" fill="#7a92a3"
+                        stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                  <rect x="926.74267578125" y="96.5" width="59.5048828125" height="214.5" r="0" rx="0" ry="0"
+                        fill="#4da74d" stroke="none" fill-opacity="1"
+                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect>
+                </svg>
+              </div>
+            </div>
+          </div>
 
-        $(document).ready(function() {
-            $("#chat_div").chatbox(
-                {//id : "chat_div",
-                 title : "Chat De Tornado",
-                 user : "hoge",
-                 offset: 0,
-                 width: 500,
-                 messageSent: function(id, user, msg){
-                     var user_id = $('#user_id').text();
-                     this.boxManager.addMsg(user_id, msg);
-                     sendAction(user_id, msg);
-            }});
-        });
+        </div>
+        <!-- chart -->
 
 
+        <!-- Controller -->
+        <div id="controller">
+          <div class="row">
+            <div class="input-field col s12">
+              <label for="access_token">Enter Access Token</label>
+              <input type="text" id="access_token">
+              <a id="submit_access_token" class="col s12 grey darken-3 waves-effect waves-light btn">ロボットに接続</a>
+            </div>
+          </div>
 
-  </script>
-</head>
-<body>
-<div id="user_id" style="visibility:hidden">{{ user_id }}</div>
-<div id="chat_div" class="chat"></div>
-</body>
-</html>
+          <div class="row">
+            <img id="pepper_eye" src="{{ static_url('images/placeholder_640x360.png') }}" class="col s12"/>
+          </div>
+
+          <div class="row">
+            <div class="col s4"><a id="turn_left" class="col s12 waves-effect waves-light btn">←90°</a></div>
+            <div class="col s4"><a id="move_front" class="col s12 waves-effect waves-light btn">↑</a></div>
+            <div class="col s4"><a id="turn_right" class="col s12 waves-effect waves-light btn">90°→</a></div>
+          </div>
+
+          <div class="row">
+            <div class="col s4"><a id="move_left" class="col s12 waves-effect waves-light btn">←</a></div>
+            <div class="col s4"><a id="rotation" class="col s12 waves-effect waves-light btn">360</a></div>
+            <div class="col s4"><a id="move_right" class="col s12 waves-effect waves-light btn">→</a></div>
+          </div>
+
+          <div class="row">
+            <div class="col s4"><a id="turn_around_left" class="col s12 waves-effect waves-light btn">←180°</a></div>
+            <div class="col s4"><a id="move_back" class="col s12 waves-effect waves-light btn">↓</a></div>
+            <div class="col s4"><a id="turn_around_right" class="col s12 waves-effect waves-light btn">180°→</a></div>
+          </div>
+
+          <div class="row">
+            <div class="input-field col s12">
+              <label for="say_text">Enter Text</label>
+              <input type="text" id="say_text" required>
+              <a id="submit_text" class="col s12 waves-effect waves-light btn">ロボットに送信</a>
+            </div>
+          </div>
+
+          <div class="row">
+            <img src="{{ static_url('images/women1.jpg') }}" class="col s4 product_img"/>
+            <img src="{{ static_url('images/women2.jpg') }}" class="col s4 product_img"/>
+            <img src="{{ static_url('images/women3.jpg') }}" class="col s4 product_img"/>
+          </div>
+        </div>
+        <!-- Controller -->
+
+      </div>
+    </div>
+  </div>
+</div>
+{% end %}
