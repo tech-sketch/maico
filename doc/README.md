@@ -9,38 +9,38 @@
 * sensor(Kinect)
  * 来店した顧客の動きを捉え、local terminalに転送する
 * local terminal(PC)
- * 受け取ったセンサー情報をsensing protcolにまとめ、Web Systemへ転送する
+ * 受け取ったセンサー情報をsensing protocolにまとめ、Web Systemへ転送する
 * Web system(maico) 
- * 受け取ったsennsing protcolを集約し、特徴量を作成する
+ * 受け取ったsennsing protocolを集約し、特徴量を作成する
  * action modelは、特徴量から取るべきactionを判定する
  * state modelは、特徴量から現在のstateを判定する
- * action/stateそれぞれの情報を、action protcolにまとめる
- * action protcolの内容を基に、ダッシュボードなどの表示を行う
- * Auto modeの場合action、Manual modeの場合ユーザーからの操作を、operation protcolにまとめる
- * operation protcolを、対象の店舗・ロボットへ送信する
+ * action/stateそれぞれの情報を、action protocolにまとめる
+ * action protocolの内容を基に、ダッシュボードなどの表示を行う
+ * Auto modeの場合action、Manual modeの場合ユーザーからの操作を、operation protocolにまとめる
+ * operation protocolを、対象の店舗・ロボットへ送信する
 * Dialogue System
  * One to Oneモードの時に対話の管理を行うシステム
 * Robot(Pepper)
- * operation protcolに則り、発話やジェスチャーなどの行動を行う
- * ユーザーから得られた反応などを、sensing protcolにまとめWeb systemに送信する
+ * operation protocolに則り、発話やジェスチャーなどの行動を行う
+ * ユーザーから得られた反応などを、sensing protocolにまとめWeb systemに送信する
 
-**Protcols**
+**protocols**
 
-* sensing protcol(latency: 1req/sec~, channel:web socket)
+* sensing protocol(latency: 1req/sec~, channel:web socket)
  * sensor_id: センサーのid情報。全店舗で一意のidがふられる(それがどの店舗にあるかはWeb Systemのマスタで管理)
  * sensed[]: センサーで検知した内容の配列。targetごとに格納
  * sensed/target_id: センシング対象(主に人間)を識別するためのid
  * sensed/behaviors: name/valueのdictionaryで、検知した値を格納
-* action protcol
+* action protocol
  * shop_id: お店のid
  * target_id: ターゲットのid
  * state: state modelから得られた、状態を表す離散値
  * action: action modelから得られた、行動を表す離散値
  * reward: 行動によって得られる報酬の見込み値
-* operation protcol
+* operation protocol
  * sensor_id: 指示対象のsensorのid
  * operation: name/valueのdictionary
- * operation/say: 発話文
+ * operation/utterance: 発話文
  * operation/gesture: ジェスチャー
  * operation/display: 表示画像
  * operation/move: 移動指示
