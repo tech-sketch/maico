@@ -1,0 +1,5 @@
+comtypes==1.1.2
+numpy==1.11.0
+pygame==1.9.2a0
+pykinect2==0.1.0
+tornado==4.3
