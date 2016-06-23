@@ -1,115 +1,142 @@
-import base64
 import json
 import os
-import random
+import pickle
+import time
 
-import tornado.httpserver
+import tornado.escape
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-from tornado.web import url
+from tornado.options import define, options
+
+define('debug', default=True, help='debug mode')
 
 
-class IndexHandler(tornado.web.RequestHandler):
+class Index(tornado.web.RequestHandler):
+
     def get(self, *args, **kwargs):
-        user_id = random.randint(0, 100)
-        self.render('index.html', user_id=user_id)
+        return self.render('index.html')
 
 
-class ChatHandler(tornado.websocket.WebSocketHandler):
-    waiters = set()
-    messages = []
-
-    def open(self, *args, **kwargs):
-        self.waiters.add(self)
-        self.write_message({'messages': self.messages})
-
-    def on_message(self, message):
-        message = json.loads(message)
-        self.messages.append(message)
-        for waiter in self.waiters:
-            if waiter == self:
-                continue
-            waiter.write_message({'id': message['id'], 'message': message['message']})
-
-    def on_close(self):
-        self.waiters.remove(self)
-
-
-class PepperController(tornado.websocket.WebSocketHandler):
-    browsers = set()
-    robots = set()
-
-    def open(self, *args, **kwargs):
-        print("on open")
-        self.browsers.add(self)
-        self.write_message({'action': 'get_token', 'data': '123456'})
-
-    def on_message(self, message):
-        message = json.loads(message)
-        # print('Received: {0}'.format(message))
-        action = message['action']
-        data = message['data']
-        if action == 'browser_token':
-            self.browsers.add(self)
-        elif action == 'robottoken':
-            self.robots.add(self)
-        elif action == 'robot_action':
-            self.send_to_robot(action='robot_action', data=data)
-        elif action == 'pepper_eye':
-            # ここだけ情報の流れがPepper -> browser
-            _, _, b64_img, _ = data.split('||||')
-            for browser in self.browsers:
-                browser.write_message({'action': 'pepper_eye', 'data': b64_img})
-        elif action == 'robot_talk':
-            import urllib.parse
-            self.send_to_robot(action='robot_talk', data=urllib.parse.quote(data))
-        elif action == 'get_token':
-            self.send_to_robot(action='get_token', data=data)
-        elif action == 'actioncomplete':
-            pass
-            # self.send_to_robot()
-        elif action == 'get_token':
-            self.send_to_robot(action=action, data='connection_token')
-        elif action == 'send_access_token':
-            self.send_to_robot(action='success_connection', data=data)
-        elif action == 'product_img':
-            path, _ = data.split('?')
-            img_file = path.replace('/static/', 'static/')
-            b64 = base64.encodestring(open(img_file, "rb").read())
-            sendData = 'data:image/jpeg;base64,' + b64.decode('utf8')
-            self.send_to_robot(action=action, data=sendData)
-        else:
-            pass
-
-    def on_close(self):
-        print('on close')
-        if self in self.browsers:
-            self.browsers.remove(self)
-        else:
-            self.robots.remove(self)
-
-    def send_to_robot(self, action, data):
-        for robot in self.robots:
-            robot.write_message({'action': action, 'data': data})
-
-
-
-class Application(tornado.web.Application):
+class Observers(object):
     def __init__(self):
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        tornado.web.Application.__init__(self,
-                                         [
-                                             url(r'/', IndexHandler, name='index'),
-                                             url(r'/chat', ChatHandler, name='chat'),
-                                         ],
-                                         template_path=os.path.join(BASE_DIR, 'templates'),
-                                         static_path=os.path.join(BASE_DIR, 'static'),
-                                         )
+        self.observers = set()
 
+    def add(self, el):
+        self.observers.add(el)
+
+    def remove(self, el):
+        self.observers.remove(el)
+
+    def notify_msg(self, msg):
+        for observer in self.observers:
+            observer.write_message(msg)
+
+
+observers = Observers()
+
+
+class Observation(tornado.websocket.WebSocketHandler):
+    """
+    observers can watch human-machine dialog.
+    And judge whether speak to or not.
+    """
+
+    def open(self, *args, **kwargs):
+        observers.add(self)
+
+    def on_message(self, message):
+        # add sensor information to observers
+        pass
+
+    def on_close(self):
+        observers.remove(self)
+
+
+class Bot(object):
+    def __init__(self):
+        self.state = 0
+        self.file_name = 'state.pkl'
+
+    def generate_response(self, usr_utt):
+        if self.state == 0:
+            utt = 'こんにちは'
+        elif self.state == 1:
+            utt = '私はボットです。'
+        elif self.state == 2:
+            utt = '状態を記憶しています。'
+        else:
+            utt = 'ありがとう'
+        self.state += 1
+        return {'utt': utt}
+
+    def read_states(self):
+        try:
+            with open(self.file_name, 'rb') as f:
+                states = pickle.load(f)
+        except FileNotFoundError as e:
+            print(e.strerror)
+            states = {}
+        except EOFError:
+            states = {}
+        return states
+
+    def read_state(self, session_id):
+        states = self.read_states()
+        self.state = states.get(session_id)
+
+    def write_state(self, session_id):
+        states = self.read_states()
+        states[session_id] = self.state
+        with open(self.file_name, 'wb') as f:
+            pickle.dump(states, f)
+
+
+class Dialog(tornado.web.RequestHandler):
+    """
+    do dialog
+    if user utterance is POSTed, response system utterance.
+    state management by session
+    if user utterance is POSTed and system utterance is generated,
+    distribute those to observers.
+    """
+    cookie_name = "session_id"
+
+    def create_or_read_bot(self):
+        bot = Bot()
+
+        if not self.get_cookie(self.cookie_name):
+            sessioin_id = str(time.time())
+            self.set_cookie(self.cookie_name, sessioin_id)
+        else:
+            sessioin_id = self.get_cookie(self.cookie_name)
+            self.set_cookie(self.cookie_name, sessioin_id)
+            bot.read_state(sessioin_id)
+        return bot, sessioin_id
+
+    def post(self, *args, **kwargs):
+        bot, session_id = self.create_or_read_bot()
+        usr_utt = tornado.escape.json_decode(self.request.body.decode('utf-8'))
+        sys_utt = bot.generate_response(usr_utt)
+        bot.write_state(session_id)
+        observers.notify_msg(msg={})
+        return self.write(json.dumps(sys_utt))
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+settings = {}
+settings['debug'] = options.debug
+settings['static_path'] = os.path.join(BASE_DIR, 'static')
+settings['template_path'] = os.path.join(BASE_DIR, 'templates')
+
+application = tornado.web.Application([
+    (r'/', Index),
+    (r'/observation', Observation),
+    (r'/dialog', Dialog),
+],
+    **settings
+)
 
 if __name__ == '__main__':
-    app = Application()
-    http_server = tornado.httpserver.HTTPServer(app)
-    http_server.listen(8000)
+    application.listen(8888)
     tornado.ioloop.IOLoop.instance().start()
