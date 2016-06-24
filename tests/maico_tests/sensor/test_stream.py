@@ -6,16 +6,16 @@ from maico.sensor.stream import Confluence
 class SampleConfluence(Confluence):
 
     def __init__(self, *streams):
-        super(SampleConfluence, self).__init__(streams)
+        super(SampleConfluence, self).__init__(*streams)
     
-    def is_full(self):
+    def is_activated(self):
         print(self._pool)
         if len(self.get(int)) >= 2 and len(self.get(float)) >= 3:
             return True
         else:
             return False
 
-    def _merge(self):
+    def merge(self):
         result = 0
         for i in self.get(int):
             result += i / 2

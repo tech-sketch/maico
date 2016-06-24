@@ -2,7 +2,6 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../../"))
 from maico.sensor.monitor.kinect_monitor import KinectMonitor
-from maico.sensor.targets.human import Human
 
 
 def handle_stream(stream):
