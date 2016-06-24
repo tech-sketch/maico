@@ -78,10 +78,11 @@ var ChartSet = (function () {
         }
         return ref;
     }
-    ChartSet.prototype.addData = function (json, time) {
+    ChartSet.prototype.addData = function (json, label) {
         var isOverflow = false;
         var labels = this.getLabels();
 
+        //auto generate label
         var label_push = function (t) {
             if (t !== undefined) {
                 labels.push(t)
@@ -95,6 +96,7 @@ var ChartSet = (function () {
             }
         }
 
+        //add data to dataset
         for (k in json) {
             s = this.getSeries(k);
             if (s != null) {
@@ -106,7 +108,7 @@ var ChartSet = (function () {
             }
         }
 
-        label_push(time);
+        label_push(label);
         if (isOverflow) {
             labels.shift();
         }
@@ -139,7 +141,7 @@ var ChartSet = (function () {
             labels.push("");
         }*/
 
-        // create charg config
+        // create chart config
         var defaultConfig = {
             type: chartType,
             data: {
@@ -242,44 +244,22 @@ var ChartSet = (function () {
 }());
 
 
-var HumanTracking = (function () {
-    function HumanTracking(human_id, initial) {
-        this.human_id = human_id;
+var TargetTracker = (function () {
+    function TargetTracker(target_id, chartDef, initial) {
+        this._id = target_id;
         this.initial = (initial === undefined) ? [] : initial;
         this.rendered = false;
-        this.staying_time = 0;
-        this.chartDef = {
-            moving_rate: {
-                series: {
-                    mean_moving_rate: true,
-                    mean_stopping_rate: true
-                },
-                skip: 3,
-                limit: 1
-            },
-            speed: {
-                series: { mean_moving_speed: true },
-                skip: 3
-            },
-            actions: {
-                series: {
-                    first_action: true,
-                    first_action_E: true,
-                    first_action_A: { color: COLORS[2] }
-                },
-                skip: 3,
-                limit: 1
-            }
-        };
+        this.track_begin = moment();
+        this.chartDef = chartDef
         this.charts = {};
     };
-    HumanTracking.prototype.isMine = function (data) {
-        return (data.human_id === this.human_id) ? true : false;
+    TargetTracker.prototype.isMine = function (data) {
+        return (data._id === this._id) ? true : false;
     };
-    HumanTracking.prototype.render = function () {
+    TargetTracker.prototype.render = function () {
         for (var key in this.chartDef) {
             if (!(key in this.charts)) {
-                var _id = this.human_id + "_" + key;
+                var _id = this._id + "_" + key;
                 var canvas = document.getElementById(_id);
                 if (canvas) {
                     var chartSet = ChartSet.create(_id, key, this.chartDef[key]);
@@ -289,31 +269,40 @@ var HumanTracking = (function () {
         }
         this.rendered = true;
     };
-    HumanTracking.prototype.update = function (data) {
-        var features = data.features;
-        this.staying_time = features.staying_time;
-        var elapse = moment(data._elapse, "HHmmss.SSSSSS").toDate();
+
+    TargetTracker.prototype.getElapse = function () {
+        var elapse = moment().diff(this.track_begin);
+        return elapse
+    }
+    TargetTracker.prototype.update = function (protocol) {
+        var prediction = protocol.prediction;
+        var feedback = protocol.feedback;
+        var elapse = this.getElapse();
+
+        //show feature attributes
+        var feature = protocol.feature;
         for (var key in this.charts) {
-            if (key != "actions") {
-                this.charts[key].addData(features, elapse);
+            if (key != "prediction") {
+                this.charts[key].addData(feature["attributes"]);
                 this.charts[key].chart.update();
             }
         }
-        
-        // annotation to action. merge these to action monitoring
-        action_and_annotation = {};
-        for (var k in data.actions) {
-            action_and_annotation[k] = data.actions[k]["rate"]
-            action_and_annotation[k + "_E"] = data.actions[k]["execute"]
+
+        // prediction and feedback
+        p_and_f = {}
+        for (var k in protocol.prediction) {
+            p_and_f[k] = protocol.prediction[k]
         }
-        for(var k in data.annotation){
-            action_and_annotation[k + "_A"] = data.annotation[k];
+        for (var k in protocol.feedback) {
+            if (protocol.feedback[k] !== null) {
+                p_and_f[k + "_fb"] = protocol.feedback[k];
+            }
         }
 
-        this.charts["actions"].addData(action_and_annotation, elapse);
-        this.charts["actions"].chart.update();
+        this.charts["prediction"].addData(p_and_f);
+        this.charts["prediction"].chart.update();
 
     };
 
-    return HumanTracking;
+    return TargetTracker;
 }());

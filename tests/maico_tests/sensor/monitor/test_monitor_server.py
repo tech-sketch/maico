@@ -8,6 +8,7 @@ from maico.sensor.monitor.kinect_monitor import KinectMonitor
 from maico.sensor.monitor.server.application import SensorMonitor
 from maico.sensor.stream import FileTerminal
 from maico.sensor.streams.one_to_many_stream import OneToManyStream
+from maico.model.first_action.model import FirstActionModel
 
 
 SENSING_FILE = os.path.join(os.path.dirname(__file__), "../../../data/test_sensing.txt")
@@ -38,8 +39,10 @@ if __name__ == "__main__":
     if options.mode.upper() == "L":
         # run monitoring server
         source = FileTerminal(options.s_file)
-        app = SensorMonitor(None, options.l_file, file_source=source)
-        app.run(options.port)
+        app = SensorMonitor(FirstActionModel(), options.l_file, file_source=source)
+        app.listen(options.port)
+        tornado.ioloop.IOLoop.current().start()
+
     else:
         gui = KinectMonitor()
         logger = LogOneToMany(options.s_file)

@@ -1,4 +1,5 @@
 from maico.model.interface import MaicoModel
+from maico.sensor.targets.first_action import FirstActionPrediction
 
 
 class FirstActionModel(MaicoModel):
@@ -7,4 +8,4 @@ class FirstActionModel(MaicoModel):
         super().__init__(**kwargs)
 
     def predict(self, target):
-        return 1
+        return FirstActionPrediction(target._id, probability=0.5)

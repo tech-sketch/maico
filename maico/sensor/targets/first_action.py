@@ -18,3 +18,15 @@ class FirstActionFeature(Target):
         self.min_moving_rate = min_moving_rate
         self.mean_stopping_rate = 1 - mean_moving_rate
         self.mean_moving_speed = mean_moving_speed
+
+
+class FirstActionPrediction(Target):
+
+    def __init__(self, 
+                 _id="",
+                 probability=0,
+                 execution=0,
+                 ):
+        super().__init__(_id)
+        self.probability = probability
+        self.execution = execution

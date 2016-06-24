@@ -11,41 +11,42 @@
 <script src="{{ static_url('js/moment.min.js') }}"></script>
 
 <script src="{{ static_url('js/models.js') }}"></script>
+<script src="{{ static_url('js/view.js') }}"></script>
 <script src="{{ static_url('js/index.js') }}"></script>
 <link rel="stylesheet" href="{{ static_url('css/index.css') }}" type="text/css"/>
 
 <script>
-    var LOGS = {% raw logs %};
+    var INITIAL_DATA = {% raw protocols %};
 </script>
 {% end %}
 
 {% block body %}
 <div class="row">
     <div id="dashboard" class="col-md-12">
-        <sensor-observation  v-for="h in humans" :h="h"></sensor-observation>
+        <target-tracker  v-for="t in trackers" :t="t"></target-tracker>
     </div>
 </div>
 
-<script type="text/x-template" id="human-observation-template">
+<script type="text/x-template" id="target-tracker-template">
 <div class="row s-chart" >
     <div class="col-md-12">
-        <h3>Human: [[h.human_id]]  ([[h.staying_time]]ms)</h3>
+        <h3>Sensor: [[t._id]]  ([[t.getElapse()]]s)</h3>
         <div class="col-md-12">
-            <button id="[[h.human_id]]_first_action" type="button" 
-                v-on:click="toggle_first_action" 
-                v-bind:class="['btn', first_action ? 'btn-primary' : 'btn-secondary']">
-                First Action
+            <button id="[[t._id]]_prediction_btn" type="button" 
+                v-on:click="toggle_feedback"
+                v-bind:class="['btn', feedbacking ? 'btn-primary' : 'btn-secondary']">
+                Feedback
             </button>
         </div>
         <div class="col-md-12">
-            <canvas id="[[h.human_id]]_actions" height=60></canvas>
+            <canvas id="[[t._id]]_prediction" height=60></canvas>
         </div>
     </div>
     <div class="col-md-12">
-        <canvas id="[[h.human_id]]_moving_rate" height=60></canvas>
+        <canvas id="[[t._id]]_moving_rate" height=60></canvas>
     </div>
     <div class="col-md-12">
-        <canvas id="[[h.human_id]]_speed" height=60></canvas>
+        <canvas id="[[t._id]]_speed" height=60></canvas>
     </div>
 </div>
 </script>

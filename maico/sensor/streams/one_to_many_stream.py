@@ -2,7 +2,7 @@ from datetime import datetime
 from maico.sensor.stream import Confluence
 from maico.sensor.targets.human import Human
 from maico.sensor.targets.human_feature import MoveStatistics
-from maico.sensor.targets.first_action_feature import FirstActionFeature
+from maico.sensor.targets.first_action import FirstActionFeature
 import maico.sensor.streams.human_stream as hs
 
 

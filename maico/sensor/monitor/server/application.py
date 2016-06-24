@@ -15,8 +15,7 @@ class SensorMonitor(tornado.web.Application):
         TrainingHandler.set_training_file(training_file, is_append)
 
         if file_source:
-            SensingHandler.set_watch_file(file_source.destination)
-            self.watcher = PeriodicCallback(SensingHandler.file_read, interval)
+            SensingHandler.set_watch_file(file_source.destination, interval)
 
         handlers = [
             (r"/", IndexHandler),
@@ -33,17 +32,11 @@ class SensorMonitor(tornado.web.Application):
         )
         super(SensorMonitor, self).__init__(handlers, **settings)
 
-    def run(self, port):
-        self.listen(port)
-        if self.watcher is not None:
-            self.watcher.start()
-        tornado.ioloop.IOLoop.current().start()
-
 
 class IndexHandler(tornado.web.RequestHandler):
 
     def get(self):
-        self.render("index.html", logs=TrainingHandler.cache)
+        self.render("index.html", protocols=TrainingHandler.cache)
 
 
 class TrainingHandler(tornado.websocket.WebSocketHandler):
@@ -64,6 +57,10 @@ class TrainingHandler(tornado.websocket.WebSocketHandler):
             cls.write_mode = "a"
 
     def open(self):
+        if len(TrainingHandler.waiters) == 0 and SensingHandler.watch_scheduler is not None:
+            if not SensingHandler.watch_scheduler.is_running():
+                SensingHandler.watch_scheduler.start()
+
         TrainingHandler.waiters.add(self)
 
     def on_close(self):
@@ -80,7 +77,7 @@ class TrainingHandler(tornado.websocket.WebSocketHandler):
         ts = target_or_targets if isinstance(target_or_targets, (list, tuple)) else [target_or_targets]
 
         def p(t):
-            predicted = {} if cls.model is None else cls.model.predict(y)
+            predicted = {} if cls.model is None else cls.model.predict(t).to_dict()
             feedback = {}
 
             if t._id in cls.feedbacks:
@@ -132,13 +129,15 @@ class TrainingHandler(tornado.websocket.WebSocketHandler):
 class SensingHandler(tornado.websocket.WebSocketHandler):
     watch_file = ""
     watch_position = 0
+    watch_scheduler = None
 
     @classmethod
-    def set_watch_file(cls, file_path):
+    def set_watch_file(cls, file_path, interval):
         if not os.path.isfile(file_path):
             raise Exception("The file to watch does not exist")
         cls.watch_file = file_path
         cls.watch_position = 0
+        cls.watch_scheduler = PeriodicCallback(cls.file_read, interval)
 
     def on_message(self, message):
         obj = SensingProtocol.deserialize(message)
@@ -153,6 +152,7 @@ class SensingHandler(tornado.websocket.WebSocketHandler):
             for ln in f:
                 obj = SensingProtocol.deserialize(ln)
                 sensed.append(obj)
+            
             cls.watch_position = f.tell()
 
         cls.send(sensed)

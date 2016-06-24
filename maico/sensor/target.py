@@ -70,6 +70,9 @@ class Target():
 
         return instance
 
+    def to_dict(self, ignores=(), ignore_private=True):
+        return self._to_dict(self, ignores, ignore_private)
+
     @classmethod
     def _to_dict(cls, instance, ignores=(), ignore_private=True):
         attrs = instance.__dict__
