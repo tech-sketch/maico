@@ -1,24 +1,27 @@
 import os
 import json
+import time
 import tornado.escape
 import tornado.web
 import tornado.websocket
+from tornado.log import app_log
 from tornado.ioloop import PeriodicCallback
 from maico.protocol.sensing_protocol import SensingProtocol, LearningProtocol
 
 
 class SensorMonitor(tornado.web.Application):
 
-    def __init__(self, model, training_file="", is_append=False, file_source=None, interval=1000):
+    def __init__(self, model, training_file="", is_append=False, file_source=None, interval=1000, emulate=False):
         self.watcher = None
         TrainingHandler.model = model
         TrainingHandler.set_training_file(training_file, is_append)
 
         if file_source:
-            SensingHandler.set_watch_file(file_source.destination, interval)
+            SensingHandler.set_watch_file(file_source.destination, interval, emulate)
 
         handlers = [
             (r"/", IndexHandler),
+            (r"/first_action", FirstActionHandler),
             (r"/monitor", TrainingHandler),
             (r"/receive", SensingHandler),
         ]
@@ -36,7 +39,14 @@ class SensorMonitor(tornado.web.Application):
 class IndexHandler(tornado.web.RequestHandler):
 
     def get(self):
-        self.render("index.html", protocols=TrainingHandler.cache)
+        self.render("index.html")
+
+
+class FirstActionHandler(tornado.web.RequestHandler):
+
+    def get(self):
+        SensingHandler.reset()
+        self.render("first_action.html", protocols=TrainingHandler.cache)
 
 
 class TrainingHandler(tornado.websocket.WebSocketHandler):
@@ -87,14 +97,14 @@ class TrainingHandler(tornado.websocket.WebSocketHandler):
             return lp.serialize()
         
         lps = [p(t) for t in ts]
-                
+
         # send to client
-        for waiter in cls.waiters:
-            for lp in lps:
+        for lp in lps:
+            for waiter in cls.waiters:
                 try:
                     waiter.write_message(lp)
                 except:
-                    gen_log.error("Error is occurred when sending message: {0}".format(str(ex)))
+                    app_log.error("Error is occurred when sending message: {0}".format(str(ex)))
 
         # write to file
         cls.write_trainings(lps)
@@ -115,11 +125,6 @@ class TrainingHandler(tornado.websocket.WebSocketHandler):
         if not cls.training_file:
             return False
 
-        """
-        if initial and os.path.isfile(cls.training_file):
-            os.remove(training_file)
-        """
-
         with open(cls.training_file, cls.write_mode, encoding="utf-8") as f:
             f.write("\n".join(learning_protocols))
 
@@ -130,33 +135,48 @@ class SensingHandler(tornado.websocket.WebSocketHandler):
     watch_file = ""
     watch_position = 0
     watch_scheduler = None
+    emulate = False
 
     @classmethod
-    def set_watch_file(cls, file_path, interval):
+    def reset(cls):
+        cls.watch_position = 0
+
+    @classmethod
+    def set_watch_file(cls, file_path, interval, emulate):
         if not os.path.isfile(file_path):
             raise Exception("The file to watch does not exist")
         cls.watch_file = file_path
         cls.watch_position = 0
         cls.watch_scheduler = PeriodicCallback(cls.file_read, interval)
+        cls.emulate = emulate
 
     def on_message(self, message):
-        obj = SensingProtocol.deserialize(message)
-        cls.send([obj])
+        body, header = SensingProtocol.deserialize(message)
+        cls.send(body)
     
     @classmethod
     def file_read(cls):
         sensed = []
-        initial = True if cls.watch_position == 0 else False
+
         with open(cls.watch_file, "r", encoding="utf-8") as f:
             f.seek(cls.watch_position)
             for ln in f:
-                obj = SensingProtocol.deserialize(ln)
-                sensed.append(obj)
+                body_header = SensingProtocol.deserialize(ln)
+                sensed.append(body_header)
             
             cls.watch_position = f.tell()
-
-        cls.send(sensed)
-    
+        
+        if not cls.emulate:
+            cls.send([b for b, h in sensed])
+        else:
+            timestamp = None
+            for b, h in sensed:
+                if timestamp is not None:
+                    elapse = (h.timestamp - timestamp).total_seconds()
+                    time.sleep(elapse)
+                timestamp = h.timestamp
+                cls.send(b)
+                
     @classmethod
     def send(self, sensed):
         TrainingHandler.predict(sensed)

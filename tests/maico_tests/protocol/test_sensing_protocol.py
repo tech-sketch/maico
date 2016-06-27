@@ -20,7 +20,7 @@ class TestSensingProtocol(unittest.TestCase):
         p = SensingProtocol(t)
         s = p.serialize()
         # maybe send to server...
-        r = SensingProtocol.deserialize(s)
+        r, _ = SensingProtocol.deserialize(s)
 
         self.assertEqual(t._id, r._id)
         self.assertEqual(t.title, r.title)

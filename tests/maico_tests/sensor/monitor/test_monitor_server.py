@@ -39,7 +39,7 @@ if __name__ == "__main__":
     if options.mode.upper() == "L":
         # run monitoring server
         source = FileTerminal(options.s_file)
-        app = SensorMonitor(FirstActionModel(), options.l_file, file_source=source)
+        app = SensorMonitor(FirstActionModel(), options.l_file, file_source=source, emulate=True)
         app.listen(options.port)
         tornado.ioloop.IOLoop.current().start()
 
