@@ -3,7 +3,7 @@ import json
 import time
 import tornado.escape
 import tornado.web
-from tornado.web import asynchronous
+from tornado import gen
 import tornado.websocket
 from tornado.log import app_log
 from tornado.ioloop import PeriodicCallback
@@ -22,6 +22,7 @@ class SensorMonitor(tornado.web.Application):
 
         handlers = [
             (r"/", IndexHandler),
+            (r"/echo", EchoHandler),
             (r"/first_action", FirstActionHandler),
             (r"/monitor", TrainingHandler),
             (r"/receive", SensingHandler),
@@ -41,6 +42,17 @@ class IndexHandler(tornado.web.RequestHandler):
 
     def get(self):
         self.render("index.html")
+
+class EchoHandler(tornado.websocket.WebSocketHandler):
+
+    def open(self):
+        print("WebSocket opened")
+
+    def on_message(self, message):
+        self.write_message("You said: " + message)
+
+    def on_close(self):
+        print("WebSocket closed")
 
 
 class FirstActionHandler(tornado.web.RequestHandler):
@@ -132,9 +144,6 @@ class TrainingHandler(tornado.websocket.WebSocketHandler):
         cls.write_mode = "a"
 
 
-from tornado import gen
-
-
 class SensingHandler(tornado.websocket.WebSocketHandler):
     watch_file = ""
     watch_position = 0
@@ -156,7 +165,7 @@ class SensingHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         body, header = SensingProtocol.deserialize(message)
-        cls.send(body)
+        self.send(body)
     
     @classmethod
     @gen.coroutine

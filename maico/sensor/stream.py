@@ -1,5 +1,7 @@
 from collections import deque
 import os
+from urllib.parse import urlparse
+import websocket
 from maico.sensor.target import Target
 from maico.protocol.sensing_protocol import SensingProtocol
 
@@ -43,24 +45,6 @@ class Terminal(Observer):
     
     def send(self, protocol):
         raise Exception("Terminal have to implements send method")
-
-
-class FileTerminal(Terminal):
-
-    def __init__(self, destination, initialize_file=True):
-        super().__init__(destination)
-        self._mode = "a"
-        dir = os.path.dirname(destination)
-        if not os.path.exists(dir):
-            raise Exception("{0} does not exist.".format(dir))
-        if initialize_file:
-            self._mode = "w"           
-
-    def send(self, protocol):
-        line = protocol.serialize()
-        with open(self.destination, self._mode, encoding="utf-8") as f:
-            f.write(line + "\n")
-        self._mode = "a"
 
 
 class Accumulator(Observer):
@@ -138,3 +122,36 @@ class Confluence(Observer):
 
     def merge(self):
         raise Exception("You have to implements merge to make instance from pooled targets")
+
+
+class FileTerminal(Terminal):
+
+    def __init__(self, destination, initialize_file=True):
+        super().__init__(destination)
+        self._mode = "a"
+        dir = os.path.dirname(destination)
+        if not os.path.exists(dir):
+            raise Exception("{0} does not exist.".format(dir))
+        if initialize_file:
+            self._mode = "w"           
+
+    def send(self, protocol):
+        line = protocol.serialize()
+        with open(self.destination, self._mode, encoding="utf-8") as f:
+            f.write(line + "\n")
+        self._mode = "a"
+
+
+class WebSocketTerminal(Terminal):
+
+    def __init__(self, destination):
+        super().__init__(destination)
+        self.connection = websocket.WebSocket()
+        self.connection.connect(self.destination)
+
+    def send(self, protocol):
+        line = protocol.serialize()
+        self.connection.send(line)
+    
+    def close(self):
+        self.connection.close()

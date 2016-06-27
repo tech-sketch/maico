@@ -13,6 +13,7 @@ class FirstActionFeature(Target):
                  ):
         super().__init__(_id)
         self.staying_time = staying_time
+        self.elapse_time = staying_time
         self.mean_moving_rate = mean_moving_rate
         self.max_moving_rate = max_moving_rate
         self.min_moving_rate = min_moving_rate

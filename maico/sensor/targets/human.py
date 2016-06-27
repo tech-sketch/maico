@@ -20,11 +20,7 @@ class Human(Target):
 
         self.face = face
         self.tracked = tracked
-        self._observed_at = datetime.utcnow()
-    
-    def get_elapsed_seconds(self):
-        return (datetime.utcnow() - self._observed_at).total_seconds()
-    
+        
     def location(self):
         if Joint.joints_are_tracked(self.joints, PyKinectV2.JointType_HipRight, PyKinectV2.JointType_HipLeft):
             # take point between hip right & left use camera space to calculate distance

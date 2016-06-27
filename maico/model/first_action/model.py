@@ -1,3 +1,4 @@
+from datetime import datetime
 from collections import deque
 from maico.model.interface import MaicoModel
 from maico.sensor.targets.first_action import FirstActionPrediction
@@ -29,10 +30,17 @@ class FirstActionHandModel(MaicoModel):
         self.action_threshold = 0.8
         self.rates = deque(maxlen=3)
 
+        self.last_called = {}
+
     def predict(self, feature):
         is_stable = lambda f: (f.max_moving_rate - f.min_moving_rate) < self.moving_stability_threshold
+        
+        if feature._id not in self.last_called:
+            self.last_called[feature._id] = datetime.utcnow()
 
-        confidence = min(feature.staying_time / self.confidence_seconds, 1) * self.confidence_rate
+        elapse_time = (datetime.utcnow() - self.last_called[feature._id]).total_seconds()
+        feature.elapse_time = elapse_time  # update feature value
+        confidence = min(elapse_time / self.confidence_seconds, 1) * self.confidence_rate
         timing = 0.4
         if is_stable(feature) and feature.mean_stopping_rate >= self.stopping_rate:
             timing = min(feature.mean_stopping_rate * 0.5, timing)
@@ -51,5 +59,6 @@ class FirstActionHandModel(MaicoModel):
         if min(self.rates) > self.action_threshold and sum(self.rates) / len(self.rates) > self.action_threshold:
             execute = 1
             self.nerve = 0.1
+            self.last_called[feature._id] = datetime.utcnow()
 
         return FirstActionPrediction(feature._id, probability=rate, execution= execute)
