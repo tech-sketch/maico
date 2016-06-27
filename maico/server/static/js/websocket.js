@@ -1,4 +1,5 @@
-var socket = new WebSocket('ws://' + location.host + '/controller');
+var socket = new WebSocket('ws://' + location.host + '/observation');
+
 function sendAction(msg) {
   socket.send(JSON.stringify(msg));
 }
@@ -14,65 +15,21 @@ socket.onclose = function() {
 socket.onmessage = function(event) {
   var data = JSON.parse(event.data);
   console.log(data);
-  if (data['action'] == 'pepper_eye'){
+  var action = data['action'];
+  if (action == 'pepper_eye'){
     var b64_img = data['data'];
     $("#pepper_eye").attr("src", b64_img);
   }
+  else if (action == 'update_chart') {
+    if (chart_data.length > 30) {
+        chart_data.shift();
+    }
+    chart_data.push(data['data']);
+    chart.setData(chart_data);
+  //console.log(chart.data);
+   // chart.setData([data['data']]);
+  }
 }
-
-$('#move_left').on('click', function(){
-  console.log('move_left');
-  var msg = {action: 'robot_action', data: 'move_left'};
-  sendAction(msg);
-})
-
-$('#move_front').on('click', function(){
-  console.log('move_front');
-  var msg = {action: 'robot_action', data: 'move_front'};
-  sendAction(msg);
-})
-
-$('#move_right').on('click', function(){
-  console.log('move_right');
-  var msg = {action: 'robot_action', data: 'move_right'};
-  sendAction(msg);
-})
-
-$('#move_back').on('click', function(){
-  console.log('move_back');
-  var msg = {action: 'robot_action', data: 'move_back'};
-  sendAction(msg);
-})
-
-$('#turn_left').on('click', function(){
-  console.log('turn_left');
-  var msg = {action: 'robot_action', data: 'move_round90_left'};
-  sendAction(msg);
-})
-
-$('#turn_right').on('click', function(){
-  console.log('turn_right');
-  var msg = {action: 'robot_action', data: 'move_round90_right'};
-  sendAction(msg);
-})
-
-$('#turn_around_left').on('click', function(){
-  console.log('turn_around_left');
-  var msg = {action: 'robot_action', data: 'move_round180_left'};
-  sendAction(msg);
-})
-
-$('#turn_around_right').on('click', function(){
-  console.log('turn_around_right');
-  var msg = {action: 'robot_action', data: 'move_round180_right'};
-  sendAction(msg);
-})
-
-$('#rotation').on('click', function(){
-  console.log('rotation');
-  var msg = {action: 'robot_action', data: 'move_round'};
-  sendAction(msg);
-})
 
 $('#submit_access_token').on('click', function(){
   console.log('access_token');
@@ -108,10 +65,4 @@ $('#say_text').keypress(function(e){
     var msg = {action: 'robot_talk', data: text};
     sendAction(msg);
   }
-})
-
-$('.product_img').on('click', function(){
-  var src = $(this).attr('src');
-  var msg = {action: 'product_img', data: src};
-  sendAction(msg);
 })

@@ -8,6 +8,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 from tornado.options import define, options
+from tornado.web import url
 
 define('debug', default=True, help='debug mode')
 
@@ -43,13 +44,20 @@ class Observation(tornado.websocket.WebSocketHandler):
     """
 
     def open(self, *args, **kwargs):
+        print('on open')
         observers.add(self)
 
     def on_message(self, message):
         # add sensor information to observers
-        pass
+        print(message)
+        message = tornado.escape.json_decode(message)
+        action = message['action']
+        if action == 'update_chart':
+            observers.notify_msg(message)
+
 
     def on_close(self):
+        print('on close')
         observers.remove(self)
 
 
@@ -130,9 +138,9 @@ settings['static_path'] = os.path.join(BASE_DIR, 'static')
 settings['template_path'] = os.path.join(BASE_DIR, 'templates')
 
 application = tornado.web.Application([
-    (r'/', Index),
-    (r'/observation', Observation),
-    (r'/dialog', Dialog),
+    url(r'/', Index, name='index'),
+    url(r'/observation', Observation),
+    url(r'/dialog', Dialog),
 ],
     **settings
 )

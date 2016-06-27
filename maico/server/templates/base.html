@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="{{ static_url('css/materialize.css') }}" type="text/css" rel="stylesheet" media="screen,projection"/>
   <link href="{{ static_url('css/style.css') }}" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+
 </head>
 <body>
 <nav class="cyan darken-1" role="navigation">
@@ -32,6 +34,9 @@
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="{{ static_url('js/materialize.js') }}"></script>
 <script src="{{ static_url('js/init.js') }}"></script>
-<script src="{{ static_url('js/switcher.js') }}"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+{% block bottom_line %}
+{% end %}
 </body>
 </html>
