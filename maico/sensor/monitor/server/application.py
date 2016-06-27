@@ -3,6 +3,7 @@ import json
 import time
 import tornado.escape
 import tornado.web
+from tornado.web import asynchronous
 import tornado.websocket
 from tornado.log import app_log
 from tornado.ioloop import PeriodicCallback
@@ -126,9 +127,12 @@ class TrainingHandler(tornado.websocket.WebSocketHandler):
             return False
 
         with open(cls.training_file, cls.write_mode, encoding="utf-8") as f:
-            f.write("\n".join(learning_protocols))
+            f.write("\n".join(learning_protocols) + "\n")
 
         cls.write_mode = "a"
+
+
+from tornado import gen
 
 
 class SensingHandler(tornado.websocket.WebSocketHandler):
@@ -155,6 +159,7 @@ class SensingHandler(tornado.websocket.WebSocketHandler):
         cls.send(body)
     
     @classmethod
+    @gen.coroutine
     def file_read(cls):
         sensed = []
 
@@ -173,7 +178,8 @@ class SensingHandler(tornado.websocket.WebSocketHandler):
             for b, h in sensed:
                 if timestamp is not None:
                     elapse = (h.timestamp - timestamp).total_seconds()
-                    time.sleep(elapse)
+                    #time.sleep(elapse)
+                    yield gen.sleep(elapse)
                 timestamp = h.timestamp
                 cls.send(b)
                 

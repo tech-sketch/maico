@@ -32,8 +32,8 @@ function buildViewModel(target, template, chartDef, makeFeedback) {
             toggle_feedback: function () {
                 this.feedbacking = !this.feedbacking; //toggle
                 f_frame = {}
-                for (k in t.feedback) { //copy struct
-                    f_frame[k] = null;
+                for (k in this.t.feedback) { //copy struct
+                    f_frame[k] = 0;
                 }
                 f = makeFeedback(this.feedbacking, f_frame);
                 this.$dispatch("feedback", this.t, f);

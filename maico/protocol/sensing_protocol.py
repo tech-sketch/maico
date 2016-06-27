@@ -60,7 +60,7 @@ class LearningProtocol(SensingProtocol):
         self.prediction = prediction
         self.feedback = feedback
         if len(self.feedback) == 0:
-            self.feedback = dict.fromkeys(self.prediction.keys(), None)
+            self.feedback = dict.fromkeys(self.prediction.keys(), 0)
 
     @classmethod
     def deserialize(cls, s):
