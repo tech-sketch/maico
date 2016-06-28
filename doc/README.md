@@ -27,10 +27,12 @@
 **protocols**
 
 * sensing protocol(latency: 1req/sec~, channel:web socket)
- * sensor_id: センサーのid情報。全店舗で一意のidがふられる(それがどの店舗にあるかはWeb Systemのマスタで管理)
- * sensed[]: センサーで検知した内容の配列。targetごとに格納
- * sensed/target_id: センシング対象(主に人間)を識別するためのid
- * sensed/behaviors: name/valueのdictionaryで、検知した値を格納
+ * (sensor_id): センサーのid情報。全店舗で一意のidがふられる(それがどの店舗にあるかはWeb Systemのマスタで管理)
+ * _id: 検知したオブジェクトに振られる、一意のid
+ * timestamp: 検知された自国のタイムスタンプ(%Y-%m-%d %H:%M:%S.%f)
+ * feature{}: センサーで検知した情報を格納したディクショナリ
+ * feature.__type__: 検知したオブジェクトのPythonクラス型情報
+ * feature.attributes：検知したオブジェクトの観測情報(key/value)
 * action protocol
  * shop_id: お店のid
  * target_id: ターゲットのid
