@@ -1,13 +1,37 @@
 {% extends "base.html" %}
 
 {% block head %}
+<title>Maico Training Portal</title>
 <link rel="stylesheet" href="{{ static_url('css/index.css') }}" type="text/css"/>
+{% end %}
+
+{% block page-title %}
+<div class="jumbotron hero-spacer" style="background-color:ghostwhite">
+    <h1>Maico Training Portal</h1>
+    <p> Please select what kinds of sensor you want to train.
+    </p>
+</div>
 {% end %}
 
 {% block body %}
 <div class="row">
-    <div id="dashboard" class="col-md-12">
+    <div class="col-md-12">
+        <h3>Kinds of Training</h3>
+    </div>
+</div>
 
+<div class="row text-center">
+    <div class="col-md-3 col-sm-6 hero-feature">
+        <div class="thumbnail">
+            <img src="{{ static_url('images/first_action.PNG') }}" alt="">
+            <div class="caption">
+                <h3>First Action</h3>
+                <p>Observe the human behavior and estiamte the probability of call (first action).</p>
+                <p>
+                    <a href="/first_action" class="btn btn-primary" target="_first_action">Training Now!</a>
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 
