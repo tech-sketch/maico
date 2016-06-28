@@ -277,13 +277,13 @@ var TargetTracker = (function () {
     TargetTracker.prototype.update = function (protocol) {
         var prediction = protocol.prediction;
         var feedback = protocol.feedback;
-        var elapse = this.getElapse();
+        var elapse = moment(0).add(parseFloat(protocol.feature.attributes.staying_time), "s").toDate();
 
         //show feature attributes
         var feature = protocol.feature;
         for (var key in this.charts) {
             if (key != "prediction") {
-                this.charts[key].addData(feature["attributes"]);
+                this.charts[key].addData(feature["attributes"], elapse);
                 this.charts[key].chart.update();
             }
         }
@@ -299,7 +299,7 @@ var TargetTracker = (function () {
             }
         }
 
-        this.charts["prediction"].addData(p_and_f);
+        this.charts["prediction"].addData(p_and_f, elapse);
         this.charts["prediction"].chart.update();
 
     };
