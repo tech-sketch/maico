@@ -42,7 +42,7 @@ def on_open(ws):
 
 
 if __name__ == "__main__":
-    url = 'ws://localhost:8888/observation'
+    url = 'ws://localhost:8080/observation'
     websocket.enableTrace(True)
     ws = websocket.WebSocketApp(url,
                                 on_message=on_message,

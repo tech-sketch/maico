@@ -1,4 +1,4 @@
-var socket = new WebSocket('ws://' + location.host + '/observation');
+var socket = new ReconnectingWebSocket('ws://' + location.host + '/observation');
 
 function sendAction(msg) {
     socket.send(JSON.stringify(msg));
