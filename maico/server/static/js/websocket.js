@@ -25,6 +25,7 @@ socket.onmessage = function(event) {
         if (chart_data.length > 30) {
             chart_data.shift();
         }
+        console.log(data['data']);
         chart_data.push(data['data']);
         chart.setData(chart_data);
     }
