@@ -2,48 +2,48 @@
 
 {% block content %}
 <div class="container">
-  <div class="section">
-    <div class="row">
 
-      <!-- chart -->
-      <div class="col s12 l12">
-        <div id="myfirstchart" style="height: 250px;"></div>
-      </div>
-      <!-- chart -->
+  <div class="row">
+    <div class="col s12 l12">
+      <div id="myfirstchart" style="height: 250px;"></div>
     </div>
+  </div>
 
-    <!-- Controller -->
-    <div class="row">
-      <div class="col s6 l6">
+  <!-- Controller -->
+  <div class="row">
+    <div class="col s12 l6">
 
-        <div id="controller">
-          <div class="row">
-            <div class="input-field col s12">
-              <label for="access_token">Enter Access Token</label>
-              <input type="text" id="access_token">
-              <a id="submit_access_token" class="col s12 grey darken-3 waves-effect waves-light btn">ロボットに接続</a>
-            </div>
-          </div>
+      <div id="controller">
 
-          <div class="row">
-            <img id="pepper_eye" src="{{ static_url('images/placeholder_640x360.png') }}" class="col s12"/>
-          </div>
-
+        <div class="row">
+          <img id="pepper_eye" src="{{ static_url('images/placeholder_640x360.png') }}" class="col s12"/>
         </div>
-      </div>
 
-      <div class="col s6 l6">
         <div class="row">
           <div class="input-field col s12">
-            <label for="say_text">Enter Text</label>
-            <input type="text" id="say_text" required>
-            <a id="submit_text" class="col s12 waves-effect waves-light btn">ロボットに送信</a>
+            <label for="access_token">Enter Access Token</label>
+            <input type="text" id="access_token">
+            <a id="submit_access_token" class="col s12 grey darken-3 waves-effect waves-light btn">ロボットに接続</a>
           </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col s12 l6">
+      <div class="row">
+        <div id="chat" class="col s12">
+        </div>
+
+        <div class="input-field col s12">
+          <label for="say_text">Enter Text</label>
+          <input type="text" id="say_text" required>
+          <a id="submit_text" class="col s12 waves-effect waves-light btn">ロボットに送信</a>
         </div>
       </div>
     </div>
-    <!-- Controller -->
   </div>
+  <!-- Controller -->
 </div>
 {% end %}
 
@@ -65,8 +65,6 @@
   // chart.
   labels: ['Value']
   });
-
-
 </script>
 <script src="{{ static_url('js/websocket.js') }}"></script>
 {% end %}

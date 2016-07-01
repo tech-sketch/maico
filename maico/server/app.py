@@ -42,6 +42,8 @@ class Observation(tornado.websocket.WebSocketHandler):
     observers can watch human-machine dialog.
     And judge whether speak to or not.
     """
+    robots = set()
+    browsers = set()
 
     def open(self, *args, **kwargs):
         print('on open')
@@ -52,13 +54,40 @@ class Observation(tornado.websocket.WebSocketHandler):
         print(message)
         message = tornado.escape.json_decode(message)
         action = message['action']
+        data = message['data']
         if action == 'update_chart':
             observers.notify_msg(message)
-
+        elif action == 'browser_token':
+            self.browsers.add(self)
+        elif action == 'robottoken':
+            self.robots.add(self)
+        elif action == 'robot_action':
+            self.send_to_robot(action='robot_action', data=data)
+        elif action == 'pepper_eye':
+            # ここだけ情報の流れがPepper -> browser
+            _, _, b64_img, _ = data.split('||||')
+            observers.notify_msg({'action': 'pepper_eye', 'data': b64_img})
+            # for browser in self.browsers:
+            #   browser.write_message({'action': 'pepper_eye', 'data': b64_img})
+        elif action == 'robot_talk':
+            import urllib.parse
+            self.send_to_robot(action='robot_talk', data=urllib.parse.quote(data))
+        elif action == 'get_token':
+            self.send_to_robot(action='get_token', data=data)
+        elif action == 'actioncomplete':
+            pass
+        elif action == 'get_token':
+            self.send_to_robot(action=action, data='connection_token')
+        elif action == 'send_access_token':
+            self.send_to_robot(action='success_connection', data=data)
 
     def on_close(self):
         print('on close')
         observers.remove(self)
+
+    def send_to_robot(self, action, data):
+        for robot in self.robots:
+            robot.write_message({'action': action, 'data': data})
 
 
 class Bot(object):
@@ -127,7 +156,7 @@ class Dialog(tornado.web.RequestHandler):
         usr_utt = tornado.escape.json_decode(self.request.body.decode('utf-8'))
         sys_utt = bot.generate_response(usr_utt)
         bot.write_state(session_id)
-        observers.notify_msg(msg={})
+        observers.notify_msg(msg={'action': 'user_utt', 'data': usr_utt['usr_utt']})
         return self.write(json.dumps(sys_utt))
 
 
