@@ -62,3 +62,4 @@ class OneToManyStream(Confluence):
             mean_moving_speed=stat.moving_speed.mean_
             )
         return feature
+

@@ -51,10 +51,10 @@ class Observation(tornado.websocket.WebSocketHandler):
         observers.add(self)
 
     def on_message(self, message):
-        message = tornado.escape.json_decode(message)
-        print(message)
-        print(dir(message))
-        if 'action' in message and isinstance(message, dict):
+        message_d = tornado.escape.json_decode(message)
+        print(message_d)
+        print(dir(message_d))
+        if 'action' in message_d and isinstance(message_d, dict):
             action = message['action']
             data = message['data']
             if action == 'update_chart':
@@ -82,7 +82,7 @@ class Observation(tornado.websocket.WebSocketHandler):
                 self.send_to_robot(action=action, data='connection_token')
             elif action == 'send_access_token':
                 self.send_to_robot(action='success_connection', data=data)
-        elif 'feature' in message and isinstance(message, str):
+        elif 'feature' in message_d:
             from maico.server.data_processor import FirstActionHandModel, TrainingHandler
             model = FirstActionHandModel()
             TrainingHandler.model = model
