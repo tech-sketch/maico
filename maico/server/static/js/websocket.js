@@ -30,7 +30,7 @@ socket.onmessage = function(event) {
     }
     else if (action == 'user_utt') {
         add_text_to_chat(data['data'], true);
-        goBottom('chat');
+        scrollBottom('chat');
     }
 }
 
@@ -54,30 +54,30 @@ $('#access_token').keypress(function(e) {
 
 function add_text_to_chat(text, is_left) {
 
-  if (is_left) {
-      var tag = '<div class="balloon-wrapper">' +
-                  '<img class="avator-img" src="static/images/robot_icon.png" style="float:left;"/>' +
-                  '<div class="balloon col s10" style="float:right;">' +
-                    '<div class="msg-container">' +
-                      text +
+    if (is_left) {
+        var tag = '<div class="balloon-wrapper">' +
+                    '<img class="avator-img" src="static/images/robot_icon.png" style="float:left;"/>' +
+                    '<div class="balloon col s10" style="float:right;">' +
+                      '<div class="msg-container">' +
+                        text +
+                      '</div>' +
                     '</div>' +
-                  '</div>' +
-                '</div>';
-  }
-  else {
-      var tag = '<div class="balloon-wrapper">' +
-                  '<div class="balloon col s10" style="float:left;">' +
-                    '<div class="msg-container">' +
-                      text +
+                  '</div>';
+    }
+    else {
+        var tag = '<div class="balloon-wrapper">' +
+                    '<div class="balloon col s10" style="float:left;">' +
+                      '<div class="msg-container">' +
+                        text +
+                      '</div>' +
                     '</div>' +
-                  '</div>' +
-                  '<img class="avator-img" src="static/images/sayuri.png" style="float:right;"/>' +
-                '</div>';
-  }
-  $('#chat').append(tag);
+                    '<img class="avator-img" src="static/images/sayuri.png" style="float:right;"/>' +
+                  '</div>';
+    }
+    $('#chat').append(tag);
 }
 
-function goBottom(targetId) {
+function scrollBottom(targetId) {
     var target = $("#" + targetId);
 
     $(target).scrollTop(target.get(0).scrollHeight);
@@ -90,7 +90,7 @@ $('#submit_text').on('click', function() {
     $('#say_text').val('');
     sendAction(msg);
     add_text_to_chat(text, false);
-    goBottom('chat');
+    scrollBottom('chat');
 })
 
 $('#say_text').keypress(function(e) {
@@ -101,6 +101,6 @@ $('#say_text').keypress(function(e) {
         $(this).val('');
         sendAction(msg);
         add_text_to_chat(text, false);
-        goBottom('chat');
+        scrollBottom('chat');
     }
 })
