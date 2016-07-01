@@ -9,12 +9,7 @@
    background-color: #fafafa;
    height:100%;
    margin:0;
-   /*background-color: #e9eaed;*/
  }
- /*
-.container {
-  width: 960px;
-}*/
 
 .container {
   margin: 0 auto;
@@ -65,4 +60,51 @@ nav .brand-logo {
 }
 .icon-block .material-icons {
 	font-size: inherit;
+}
+
+div.balloon-wrapper {
+}
+
+div.balloon-wrapper::after {
+			   clear: both;
+			   content: "";
+			   display: block;
+			   line-height: 0;
+}
+
+.balloon {
+  min-height: 60px;
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+  margin: 15px auto;
+  padding: 13px;
+}
+
+.msg-container {
+    word-wrap:break-word;
+}
+
+.avator-img {
+  width: 75px;
+  border-radius: 75px;
+  -webkit-border-radius: 75px;
+  -moz-border-radius: 75px;
+  background-color:white;
+  box-shadow: 0px 0px 0px 3px #C0C0C0;
+  -moz-box-shadow: 0px 0px 0px 3px #C0C0C0;
+  -webkit-box-shadow: 0px 0px 0px 3px #C0C0C0;
+  margin-top: 5px;
+  margin: 15px auto;
+}
+
+#chat {
+height: 465px;
+overflow: scroll;
+}
+
+.fix-height {
+height: 100%;
+min-height: 100%;
 }

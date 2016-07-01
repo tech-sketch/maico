@@ -1,117 +1,107 @@
-var socket = new WebSocket('ws://' + location.host + '/controller');
+var socket = new WebSocket('ws://' + location.host + '/observation');
+
 function sendAction(msg) {
-  socket.send(JSON.stringify(msg));
+    socket.send(JSON.stringify(msg));
 }
 
 socket.onopen = function(event) {
-  var msg = {action: 'browsertoken', data: 'none'};
-  sendAction(msg);
+    var msg = {action: 'browsertoken', data: 'none'};
+
+    sendAction(msg);
 }
 
 socket.onclose = function() {
 }
 
 socket.onmessage = function(event) {
-  var data = JSON.parse(event.data);
-  console.log(data);
-  if (data['action'] == 'pepper_eye'){
-    var b64_img = data['data'];
-    $("#pepper_eye").attr("src", b64_img);
-  }
+    var data = JSON.parse(event.data);
+    var action = data['action'];
+
+    if (action == 'pepper_eye') {
+        var b64_img = data['data'];
+        $("#pepper_eye").attr("src", b64_img);
+    }
+    else if (action == 'update_chart') {
+        if (chart_data.length > 30) {
+            chart_data.shift();
+        }
+        console.log(data['data']);
+        chart_data.push(data['data']);
+        chart.setData(chart_data);
+    }
+    else if (action == 'user_utt') {
+        add_text_to_chat(data['data'], true);
+        scrollBottom('chat');
+    }
 }
 
-$('#move_left').on('click', function(){
-  console.log('move_left');
-  var msg = {action: 'robot_action', data: 'move_left'};
-  sendAction(msg);
-})
-
-$('#move_front').on('click', function(){
-  console.log('move_front');
-  var msg = {action: 'robot_action', data: 'move_front'};
-  sendAction(msg);
-})
-
-$('#move_right').on('click', function(){
-  console.log('move_right');
-  var msg = {action: 'robot_action', data: 'move_right'};
-  sendAction(msg);
-})
-
-$('#move_back').on('click', function(){
-  console.log('move_back');
-  var msg = {action: 'robot_action', data: 'move_back'};
-  sendAction(msg);
-})
-
-$('#turn_left').on('click', function(){
-  console.log('turn_left');
-  var msg = {action: 'robot_action', data: 'move_round90_left'};
-  sendAction(msg);
-})
-
-$('#turn_right').on('click', function(){
-  console.log('turn_right');
-  var msg = {action: 'robot_action', data: 'move_round90_right'};
-  sendAction(msg);
-})
-
-$('#turn_around_left').on('click', function(){
-  console.log('turn_around_left');
-  var msg = {action: 'robot_action', data: 'move_round180_left'};
-  sendAction(msg);
-})
-
-$('#turn_around_right').on('click', function(){
-  console.log('turn_around_right');
-  var msg = {action: 'robot_action', data: 'move_round180_right'};
-  sendAction(msg);
-})
-
-$('#rotation').on('click', function(){
-  console.log('rotation');
-  var msg = {action: 'robot_action', data: 'move_round'};
-  sendAction(msg);
-})
-
-$('#submit_access_token').on('click', function(){
-  console.log('access_token');
-  var access_token = $('#access_token').val();
-  $('#access_token').val('');
-  var msg = {action: 'send_access_token', data: access_token};
-  sendAction(msg);
-})
-
-$('#access_token').keypress(function(e){
-  if (e.which == 13) {
-    var access_token = $(this).val();
-    $(this).val('');
-    console.log(access_token);
+$('#submit_access_token').on('click', function() {
+    var access_token = $('#access_token').val();
     var msg = {action: 'send_access_token', data: access_token};
+
+    $('#access_token').val('');
     sendAction(msg);
-  }
 })
 
-$('#submit_text').on('click', function(){
-  var text = $('#say_text').val();
-  $('#say_text').val('');
-  console.log(text);
-  var msg = {action: 'robot_talk', data: text};
-  sendAction(msg);
+$('#access_token').keypress(function(e) {
+    if (e.which == 13) {
+        var access_token = $(this).val();
+        var msg = {action: 'send_access_token', data: access_token};
+
+        $(this).val('');
+        sendAction(msg);
+    }
 })
 
-$('#say_text').keypress(function(e){
-  if (e.which == 13) {
-    var text = $(this).val();
-    $(this).val('');
-    console.log(text);
+function add_text_to_chat(text, is_left) {
+
+    if (is_left) {
+        var tag = '<div class="balloon-wrapper">' +
+                    '<img class="avator-img" src="static/images/robot_icon.png" style="float:left;"/>' +
+                    '<div class="balloon col s10" style="float:right;">' +
+                      '<div class="msg-container">' +
+                        text +
+                      '</div>' +
+                    '</div>' +
+                  '</div>';
+    }
+    else {
+        var tag = '<div class="balloon-wrapper">' +
+                    '<div class="balloon col s10" style="float:left;">' +
+                      '<div class="msg-container">' +
+                        text +
+                      '</div>' +
+                    '</div>' +
+                    '<img class="avator-img" src="static/images/sayuri.png" style="float:right;"/>' +
+                  '</div>';
+    }
+    $('#chat').append(tag);
+}
+
+function scrollBottom(targetId) {
+    var target = $("#" + targetId);
+
+    $(target).scrollTop(target.get(0).scrollHeight);
+}
+
+$('#submit_text').on('click', function() {
+    var text = $('#say_text').val();
     var msg = {action: 'robot_talk', data: text};
+
+    $('#say_text').val('');
     sendAction(msg);
-  }
+    add_text_to_chat(text, false);
+    scrollBottom('chat');
 })
 
-$('.product_img').on('click', function(){
-  var src = $(this).attr('src');
-  var msg = {action: 'product_img', data: src};
-  sendAction(msg);
+$('#say_text').keypress(function(e) {
+    if (e.which == 13) {
+        var text = $(this).val();
+        var msg = {action: 'robot_talk', data: text};
+
+        $(this).val('');
+        sendAction(msg);
+        add_text_to_chat(text, false);
+        scrollBottom('chat');
+    }
 })
