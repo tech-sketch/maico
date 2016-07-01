@@ -2,7 +2,7 @@ from datetime import datetime
 from maico.sensor.stream import Confluence
 from maico.sensor.targets.human import Human
 from maico.sensor.targets.human_feature import MoveStatistics
-from maico.sensor.targets.first_action_feature import FirstActionFeature
+from maico.sensor.targets.first_action import FirstActionFeature
 import maico.sensor.streams.human_stream as hs
 
 
@@ -13,7 +13,7 @@ class OneToManyStream(Confluence):
 
     def __init__(self, human_stream):
 
-        self._observation_begin = datetime.utcnow()
+        self._observation_begin = None
 
         # hyper parameters (it will be arguments in future)
         self.move_threshold = 0.1  # above this speed, human act to move (not searching items)
@@ -26,7 +26,9 @@ class OneToManyStream(Confluence):
         key = target.__class__
         
         if key is Human:
-            self._pool[key] = [target]  # store only 1 (latest) human 
+            self._pool[key] = [target]  # store only 1 (latest) human
+            if self._observation_begin is None:
+                self._observation_begin = datetime.utcnow()  # remember first human
         else:
             if key not in self._pool:
                 self._pool[key] = []
@@ -49,8 +51,8 @@ class OneToManyStream(Confluence):
     def merge(self):
         h = self.get(Human)[0]
         stat = self.get(MoveStatistics)[0]
+        staying_time = (datetime.utcnow() - self._observation_begin).total_seconds()
 
-        staying_time = h.get_elapsed_seconds()
         feature = FirstActionFeature(
             _id=h._id,
             staying_time=staying_time,

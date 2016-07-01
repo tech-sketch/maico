@@ -27,21 +27,22 @@ class SmartJSON:
             super(SmartJSON.SmartJSONDecoder, self).__init__(object_hook=self.dict_to_object, *args, **kargs)
         
         def dict_to_object(self, d):
-            return d
+            return self._convert(d)
              
         def decode(self, obj):
             decoded = super(SmartJSON.SmartJSONDecoder, self).decode(obj)
+            return self._convert(decoded)
 
-            for k in decoded:
-                v = decoded[k]
+        def _convert(self, dic):
+            for k in dic:
+                v = dic[k]
                 if isinstance(v, str) and len(v) == 26 and v[:4].isdigit():
                     # 26 -> formatted datetime string length
                     try:
-                        decoded[k] = datetime.strptime(v, SmartJSON.DATETIME_FORMAT)
+                        dic[k] = datetime.strptime(v, SmartJSON.DATETIME_FORMAT)
                     except ValueError as vex:
                         pass
-
-            return decoded
+            return dic
 
 
 class Target():
@@ -53,8 +54,8 @@ class Target():
         """
         self._id = _id  # unique id to identify the target
     
-    def serialize(self):
-        d = self.__to_dict(self)
+    def serialize(self, ignores=(), ignore_private=True):
+        d = self._to_dict(self, ignores, ignore_private)
         return SmartJSON.dumps(d)
 
     @classmethod
@@ -69,8 +70,11 @@ class Target():
 
         return instance
 
+    def to_dict(self, ignores=(), ignore_private=True):
+        return self._to_dict(self, ignores, ignore_private)
+
     @classmethod
-    def __to_dict(cls, instance, ignores=(), ignore_private=True):
+    def _to_dict(cls, instance, ignores=(), ignore_private=True):
         attrs = instance.__dict__
         result = {}
         for a in attrs:

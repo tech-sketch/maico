@@ -5,6 +5,7 @@ import ctypes
 import _ctypes
 import numpy as np
 import _thread as thread
+from datetime import datetime
 from maico.sensor.environment import Environment
 from maico.sensor.stream import Stream
 from maico.sensor.targets.human import Human
@@ -81,8 +82,9 @@ class KinectEnvironment(Environment):
 
                         joints = body.joints
                         joint_points = self._kinect.body_joints_to_depth_space(joints)
+                        st = self.get_stream(Human)[_id]
                         h = Human(_id, joints, joint_points)
-                        self.get_stream(Human)[_id].push(h)
+                        st.push(h)
                         if self._on_body_joints:
                             self._on_body_joints(i, joints, joint_points)
 

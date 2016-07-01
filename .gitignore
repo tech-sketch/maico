@@ -319,4 +319,4 @@ paket-files/
 PyKinect2
 maico.pyproj
 maico.sln
-
+tests/data/

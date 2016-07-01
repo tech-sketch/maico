@@ -1,5 +1,9 @@
 from collections import deque
+import os
+from urllib.parse import urlparse
+import websocket
 from maico.sensor.target import Target
+from maico.protocol.sensing_protocol import SensingProtocol
 
 
 class Stream():
@@ -9,6 +13,7 @@ class Stream():
     
     def subscribe(self, observer):
         self.observers.append(observer)
+        return self
 
     def push(self, target):
         for o in self.observers:
@@ -28,6 +33,20 @@ class Observer():
         raise Exception("Observer have to implements notify method")
 
 
+class Terminal(Observer):
+
+    def __init__(self, destination):
+        super(Terminal, self).__init__()
+        self.destination = destination
+
+    def notify(self, target):
+        payload = SensingProtocol(target)
+        self.send(payload)
+    
+    def send(self, protocol):
+        raise Exception("Terminal have to implements send method")
+
+
 class Accumulator(Observer):
 
     def __init__(self, in_stream, size, shift=0):
@@ -40,6 +59,7 @@ class Accumulator(Observer):
     
     def subscribe(self, observer):
         self.out_stream.subscribe(observer)
+        return self
 
     def notify(self, target):
         self.queue.append(target)
@@ -75,6 +95,7 @@ class Confluence(Observer):
     
     def subscribe(self, observer):
         self.out_stream.subscribe(observer)
+        return self
 
     def notify(self, target):
         key = target.__class__
@@ -84,7 +105,7 @@ class Confluence(Observer):
 
         self._pool[key].append(target)
         
-        if self.is_activate():
+        if self.is_activated():
             t = self.merge()
             self.out_stream.push(t)
             self.reset()
@@ -101,3 +122,36 @@ class Confluence(Observer):
 
     def merge(self):
         raise Exception("You have to implements merge to make instance from pooled targets")
+
+
+class FileTerminal(Terminal):
+
+    def __init__(self, destination, initialize_file=True):
+        super().__init__(destination)
+        self._mode = "a"
+        dir = os.path.dirname(destination)
+        if not os.path.exists(dir):
+            raise Exception("{0} does not exist.".format(dir))
+        if initialize_file:
+            self._mode = "w"           
+
+    def send(self, protocol):
+        line = protocol.serialize()
+        with open(self.destination, self._mode, encoding="utf-8") as f:
+            f.write(line + "\n")
+        self._mode = "a"
+
+
+class WebSocketTerminal(Terminal):
+
+    def __init__(self, destination):
+        super().__init__(destination)
+        self.connection = websocket.WebSocket()
+        self.connection.connect(self.destination)
+
+    def send(self, protocol):
+        line = protocol.serialize()
+        self.connection.send(line)
+    
+    def close(self):
+        self.connection.close()
