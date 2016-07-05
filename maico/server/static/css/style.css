@@ -15,6 +15,7 @@
   margin: 0 auto;
   max-width: 100%;
   width: 100%;
+  height: calc(100% - 40px);
 }
 
 @media only screen and (min-width: 601px) {
@@ -100,11 +101,28 @@ div.balloon-wrapper::after {
 }
 
 #chat {
-height: 465px;
 overflow: scroll;
 }
 
 .fix-height {
+height: calc(100% -250px);
+}
+
+.fix-height-20 {
+height: 20%;
+}
+
+.fix-height-70 {
+height: 70%;
+background-color: red;
+}
+
+.fix-height-100{
 height: 100%;
-min-height: 100%;
+background-color:yellow;
+}
+
+.fix-height-30 {
+height: 30%;
+background-color: blue;
 }

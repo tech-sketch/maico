@@ -53,10 +53,16 @@ $('#access_token').keypress(function(e) {
     }
 })
 
+$('#connect2robot').on('click', function() {
+    var access_token = '';
+    var msg = {action: 'send_access_token', data: access_token};
+    sendAction(msg);
+})
+
 function add_text_to_chat(text, is_left) {
 
     if (is_left) {
-        var tag = '<div class="balloon-wrapper">' +
+        /*var tag = '<div class="balloon-wrapper">' +
                     '<img class="avator-img" src="static/images/robot_icon.png" style="float:left;"/>' +
                     '<div class="balloon col s10" style="float:right;">' +
                       '<div class="msg-container">' +
@@ -64,8 +70,24 @@ function add_text_to_chat(text, is_left) {
                       '</div>' +
                     '</div>' +
                   '</div>';
+        */
+        var tag = '<li class="left clearfix">' +
+                    '<span class="chat-img pull-left">' +
+                      '<img src="http://placehold.it/50/55C1E7/fff" alt="User Avatar" class="img-circle" />' +
+                    '</span>' +
+                    '<div class="chat-body clearfix">' +
+                      '<div class="header">' +
+                        '<strong class="primary-font">Jack Sparrow</strong>' +
+                        '<small class="pull-right text-muted"><i class="fa fa-clock-o fa-fw"></i></small>' +
+                      '</div>' +
+                      '<p>' +
+                        text +
+                      '</p>' +
+                    '</div>' +
+                  '</li>';
     }
     else {
+    /*
         var tag = '<div class="balloon-wrapper">' +
                     '<div class="balloon col s10" style="float:left;">' +
                       '<div class="msg-container">' +
@@ -74,8 +96,23 @@ function add_text_to_chat(text, is_left) {
                     '</div>' +
                     '<img class="avator-img" src="static/images/sayuri.png" style="float:right;"/>' +
                   '</div>';
+    */
+        var tag = '<li class="right clearfix">' +
+                    '<span class="chat-img pull-right">' +
+                      '<img src="http://placehold.it/50/FA6F57/fff" alt="User Avatar" class="img-circle" />' +
+                    '</span>' +
+                    '<div class="chat-body clearfix">' +
+                      '<div class="header">' +
+                        '<small class=" text-muted"><i class="fa fa-clock-o fa-fw"></i></small>' +
+                        '<strong class="pull-right primary-font">Robot</strong>' +
+                      '</div>' +
+                      '<p>' +
+                        text
+                      '</p>' +
+                    '</div>' +
+                  '</li>';
     }
-    $('#chat').append(tag);
+    $('.chat').append(tag);
 }
 
 function scrollBottom(targetId) {
@@ -84,6 +121,7 @@ function scrollBottom(targetId) {
     $(target).scrollTop(target.get(0).scrollHeight);
 }
 
+/*
 $('#submit_text').on('click', function() {
     var text = $('#say_text').val();
     var msg = {action: 'robot_talk', data: text};
@@ -95,6 +133,28 @@ $('#submit_text').on('click', function() {
 })
 
 $('#say_text').keypress(function(e) {
+    if (e.which == 13) {
+        var text = $(this).val();
+        var msg = {action: 'robot_talk', data: text};
+
+        $(this).val('');
+        sendAction(msg);
+        add_text_to_chat(text, false);
+        scrollBottom('chat');
+    }
+})
+*/
+$('#btn-chat').on('click', function() {
+    var text = $('#btn-input').val();
+    var msg = {action: 'robot_talk', data: text};
+
+    $('#btn-input').val('');
+    sendAction(msg);
+    add_text_to_chat(text, false);
+    scrollBottom('chat');
+})
+
+$('#btn-input').keypress(function(e) {
     if (e.which == 13) {
         var text = $(this).val();
         var msg = {action: 'robot_talk', data: text};

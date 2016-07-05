@@ -9,8 +9,8 @@ import tornado.web
 import tornado.websocket
 from tornado.options import define, options
 from tornado.web import url
-from maico.server.data_processor import FirstActionHandModel, TrainingHandler
 
+from maico.server.data_processor import FirstActionHandModel, TrainingHandler
 
 define('debug', default=True, help='debug mode')
 
@@ -18,7 +18,7 @@ define('debug', default=True, help='debug mode')
 class Index(tornado.web.RequestHandler):
 
     def get(self, *args, **kwargs):
-        return self.render('index.html')
+        return self.render('index2.html')
 
 
 class Observers(object):
@@ -57,6 +57,7 @@ class Observation(tornado.websocket.WebSocketHandler):
         message_d = tornado.escape.json_decode(message)
         print(message_d)
         print(dir(message_d))
+        print(type(message_d))
         if 'action' in message_d and isinstance(message_d, dict):
             message = message_d
             action = message['action']
@@ -88,7 +89,7 @@ class Observation(tornado.websocket.WebSocketHandler):
                 self.send_to_robot(action='success_connection', data=data)
         elif 'feature' in message_d:
             TrainingHandler.model = self.model
-            predicted = json.loads(TrainingHandler.predict(message))
+            predicted = json.loads(TrainingHandler.predict(message_d))
             print(predicted)
             message = {'action': 'update_chart',
                        'data': {'value': round(predicted['prediction']['probability'], 3), 'time': self.idx}}
