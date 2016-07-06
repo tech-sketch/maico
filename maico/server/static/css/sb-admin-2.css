@@ -217,7 +217,9 @@ body {
 
 .chat-panel-body {
     height: 515px;
+    padding: 15px;
     overflow-y: scroll;
+    word-wrap: break-word;
 }
 
 .login-panel {
