@@ -89,7 +89,7 @@ class Observation(tornado.websocket.WebSocketHandler):
                 self.send_to_robot(action='success_connection', data=data)
         elif 'feature' in message_d:
             TrainingHandler.model = self.model
-            predicted = json.loads(TrainingHandler.predict(message_d))
+            predicted = json.loads(TrainingHandler.predict(message))
             print(predicted)
             message = {'action': 'update_chart',
                        'data': {'value': round(predicted['prediction']['probability'], 3), 'time': self.idx}}
