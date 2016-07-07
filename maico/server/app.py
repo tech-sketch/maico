@@ -1,7 +1,7 @@
 import json
 import os
-import pickle
 import time
+import urllib.parse
 
 import tornado.escape
 import tornado.ioloop
@@ -10,7 +10,8 @@ import tornado.websocket
 from tornado.options import define, options
 from tornado.web import url
 
-from maico.server.data_processor import FirstActionHandModel, TrainingHandler
+from maico.server.dialog.bot import Bot
+from maico.server.utils.data_processor import FirstActionHandModel, TrainingHandler
 
 define('debug', default=True, help='debug mode')
 
@@ -56,8 +57,6 @@ class Observation(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         message_d = tornado.escape.json_decode(message)
         print(message_d)
-        print(dir(message_d))
-        print(type(message_d))
         if 'action' in message_d and isinstance(message_d, dict):
             message = message_d
             action = message['action']
@@ -74,10 +73,7 @@ class Observation(tornado.websocket.WebSocketHandler):
                 # ここだけ情報の流れがPepper -> browser
                 _, _, b64_img, _ = data.split('||||')
                 observers.notify_msg({'action': 'pepper_eye', 'data': b64_img})
-                # for browser in self.browsers:
-                #   browser.write_message({'action': 'pepper_eye', 'data': b64_img})
             elif action == 'robot_talk':
-                import urllib.parse
                 self.send_to_robot(action='robot_talk', data=urllib.parse.quote(data))
             elif action == 'get_token':
                 self.send_to_robot(action='get_token', data=data)
@@ -89,14 +85,13 @@ class Observation(tornado.websocket.WebSocketHandler):
                 self.send_to_robot(action='success_connection', data=data)
         elif 'feature' in message_d:
             TrainingHandler.model = self.model
-            predicted = json.loads(TrainingHandler.predict(message))
-            print(predicted)
+            predicted = json.loads(TrainingHandler.predict(message_d))
             message = {'action': 'update_chart',
                        'data': {'value': round(predicted['prediction']['probability'], 3), 'time': self.idx}}
             observers.notify_msg(message)
             if predicted['prediction']['execution']:
-                import urllib.parse
-                self.send_to_robot(action='robot_talk', data=urllib.parse.quote('賞品のご説明をしましょうか'))
+                self.send_to_robot(action='robot_talk', data=urllib.parse.quote('商品のご説明をしましょうか'))
+                observers.notify_msg(msg={'action': 'system_utt', 'data': '商品のご説明をしましょうか？'})
             self.idx += 1
 
     def on_close(self):
@@ -106,71 +101,6 @@ class Observation(tornado.websocket.WebSocketHandler):
     def send_to_robot(self, action, data):
         for robot in self.robots:
             robot.write_message({'action': action, 'data': data})
-
-
-class Bot(object):
-    def __init__(self):
-        self.state = 0
-        self.file_name = 'state.pkl'
-
-    def is_yes(self, utt):
-        return 'はい' in utt
-
-    def is_no(self, utt):
-        return 'いいえ' in utt
-
-    def generate_response(self, usr_utt):
-        if self.state == 0:
-            if self.is_yes(usr_utt):
-                utt = '賞品の説明。ご予算はどれくらいですか？'
-            elif self.is_no(usr_utt):
-                utt = 'そうですか、ごゆっくりどうぞ'
-            else:
-                utt = 'pass'
-        elif self.state == 1:
-            if self.is_yes(usr_utt):
-                utt = '動画や音楽の作成に使用する予定はありますか？'
-            else:
-                utt = 'pass'
-        elif self.state == 2:
-            if self.is_yes(usr_utt):
-                utt = 'パソコンのセットアップはおひとりでできそうですか？'
-            elif self.is_no(usr_utt):
-                utt = 'パソコンのセットアップはおひとりでできそうですか？'
-            else:
-                utt = 'pass'
-        elif self.state == 3:
-            if self.is_yes(usr_utt):
-                utt = 'それでしたらこちらのパソコンAをおすすめします。'
-            elif self.is_no(usr_utt):
-                utt = 'それでしたらこちらのパソコンBをおすすめします。'
-            else:
-                utt = 'pass'
-        else:
-            utt = 'どういたしまして'
-        self.state += 1
-        return {'utt': utt}
-
-    def read_states(self):
-        try:
-            with open(self.file_name, 'rb') as f:
-                states = pickle.load(f)
-        except FileNotFoundError as e:
-            print(e.strerror)
-            states = {}
-        except EOFError:
-            states = {}
-        return states
-
-    def read_state(self, session_id):
-        states = self.read_states()
-        self.state = states.get(session_id)
-
-    def write_state(self, session_id):
-        states = self.read_states()
-        states[session_id] = self.state
-        with open(self.file_name, 'wb') as f:
-            pickle.dump(states, f)
 
 
 class Dialog(tornado.web.RequestHandler):

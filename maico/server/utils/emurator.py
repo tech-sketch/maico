@@ -25,9 +25,9 @@ def on_open(ws):
         ws.send(json.dumps({'action': 'robottoken', 'data': 'none'}))
         import os
         import time
-        from maico.server.data_processor import SensingHandler
+        from maico.server.utils.data_processor import SensingHandler
         i = 1
-        SENSING_FILE = os.path.join(os.path.dirname(__file__), "../../tests/samples/sensing_protocol_samples.txt")
+        SENSING_FILE = os.path.join(os.path.dirname(__file__), "../../../tests/samples/sensing_protocol_samples.txt")
         SensingHandler.set_watch_file(SENSING_FILE)
 
         while True:
