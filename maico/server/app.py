@@ -143,6 +143,12 @@ class Dialog(tornado.web.RequestHandler):
             return self.write(json.dumps(sys_utt))
 
 
+class Reset(tornado.web.RequestHandler):
+    def post(self, *args, **kwargs):
+        Bot.in_manual_dialog = False
+        Bot.in_automatic_dialog = False
+
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 settings = {}
 settings['debug'] = options.debug
@@ -153,6 +159,7 @@ application = tornado.web.Application([
     url(r'/', Index, name='index'),
     url(r'/observation', Observation),
     url(r'/dialog', Dialog),
+    url(r'/reset', Reset),
 ],
     **settings
 )
