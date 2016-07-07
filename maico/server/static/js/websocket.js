@@ -32,6 +32,17 @@ socket.onmessage = function(event) {
     else if (action == 'user_utt') {
         add_text_to_chat(data['data'], true);
         scrollBottom('chat');
+    } else if (action == 'system_utt') {
+        add_text_to_chat(data['data'], false);
+        scrollBottom('chat');
+    } else {
+        Lobibox.notify('error', {
+                        sound: false,
+                        position: 'bottom left',
+                        size: 'mini',
+                        title: '助けて！',
+                        msg: '私ではこれ以上対応できません。'
+        });
     }
 }
 

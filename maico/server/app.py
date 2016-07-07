@@ -96,7 +96,7 @@ class Observation(tornado.websocket.WebSocketHandler):
             observers.notify_msg(message)
             if predicted['prediction']['execution']:
                 import urllib.parse
-                self.send_to_robot(action='robot_talk', data=urllib.parse.quote('\rspd=200\なまむぎなまごめなまたまご'))
+                self.send_to_robot(action='robot_talk', data=urllib.parse.quote('賞品のご説明をしましょうか'))
             self.idx += 1
 
     def on_close(self):
@@ -113,15 +113,41 @@ class Bot(object):
         self.state = 0
         self.file_name = 'state.pkl'
 
+    def is_yes(self, utt):
+        return 'はい' in utt
+
+    def is_no(self, utt):
+        return 'いいえ' in utt
+
     def generate_response(self, usr_utt):
         if self.state == 0:
-            utt = 'こんにちは'
+            if self.is_yes(usr_utt):
+                utt = '賞品の説明。ご予算はどれくらいですか？'
+            elif self.is_no(usr_utt):
+                utt = 'そうですか、ごゆっくりどうぞ'
+            else:
+                utt = 'pass'
         elif self.state == 1:
-            utt = '私はボットです。'
+            if self.is_yes(usr_utt):
+                utt = '動画や音楽の作成に使用する予定はありますか？'
+            else:
+                utt = 'pass'
         elif self.state == 2:
-            utt = '状態を記憶しています。'
+            if self.is_yes(usr_utt):
+                utt = 'パソコンのセットアップはおひとりでできそうですか？'
+            elif self.is_no(usr_utt):
+                utt = 'パソコンのセットアップはおひとりでできそうですか？'
+            else:
+                utt = 'pass'
+        elif self.state == 3:
+            if self.is_yes(usr_utt):
+                utt = 'それでしたらこちらのパソコンAをおすすめします。'
+            elif self.is_no(usr_utt):
+                utt = 'それでしたらこちらのパソコンBをおすすめします。'
+            else:
+                utt = 'pass'
         else:
-            utt = 'ありがとう'
+            utt = 'どういたしまして'
         self.state += 1
         return {'utt': utt}
 
@@ -172,9 +198,13 @@ class Dialog(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
         bot, session_id = self.create_or_read_bot()
         usr_utt = tornado.escape.json_decode(self.request.body.decode('utf-8'))
-        sys_utt = bot.generate_response(usr_utt)
+        sys_utt = bot.generate_response(usr_utt['usr_utt'])
         bot.write_state(session_id)
         observers.notify_msg(msg={'action': 'user_utt', 'data': usr_utt['usr_utt']})
+        if sys_utt['utt'] == 'pass':
+            observers.notify_msg(msg={'action': 'change_operator', 'data': sys_utt['utt']})
+        else:
+            observers.notify_msg(msg={'action': 'system_utt', 'data': sys_utt['utt']})
         return self.write(json.dumps(sys_utt))
 
 
