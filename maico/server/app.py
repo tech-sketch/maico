@@ -89,9 +89,10 @@ class Observation(tornado.websocket.WebSocketHandler):
             message = {'action': 'update_chart',
                        'data': {'value': round(predicted['prediction']['probability'], 3), 'time': self.idx}}
             observers.notify_msg(message)
-            if predicted['prediction']['execution']:
+            if predicted['prediction']['execution'] and Bot.in_automatic_dialog == False:
                 self.send_to_robot(action='robot_talk', data=urllib.parse.quote('商品のご説明をしましょうか'))
                 observers.notify_msg(msg={'action': 'system_utt', 'data': '商品のご説明をしましょうか？'})
+                Bot.in_automatic_dialog = True
             self.idx += 1
 
     def on_close(self):
@@ -128,14 +129,18 @@ class Dialog(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
         bot, session_id = self.create_or_read_bot()
         usr_utt = tornado.escape.json_decode(self.request.body.decode('utf-8'))
+        observers.notify_msg(msg={'action': 'user_utt', 'data': usr_utt['usr_utt']})
+        if Bot.in_manual_dialog:
+            return self.write(json.dumps({'utt': ''}))
         sys_utt = bot.generate_response(usr_utt['usr_utt'])
         bot.write_state(session_id)
-        observers.notify_msg(msg={'action': 'user_utt', 'data': usr_utt['usr_utt']})
         if sys_utt['utt'] == 'pass':
             observers.notify_msg(msg={'action': 'change_operator', 'data': sys_utt['utt']})
+            Bot.in_manual_dialog = True
+            return self.write(json.dumps({'utt': ''}))
         else:
             observers.notify_msg(msg={'action': 'system_utt', 'data': sys_utt['utt']})
-        return self.write(json.dumps(sys_utt))
+            return self.write(json.dumps(sys_utt))
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

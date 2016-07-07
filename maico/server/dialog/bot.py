@@ -1,4 +1,10 @@
+import pickle
+
+
 class Bot(object):
+    in_automatic_dialog = False
+    in_manual_dialog = False
+
     def __init__(self):
         self.state = 0
         self.file_name = 'state.pkl'
@@ -12,7 +18,7 @@ class Bot(object):
     def generate_response(self, usr_utt):
         if self.state == 0:
             if self.is_yes(usr_utt):
-                utt = '賞品の説明。ご予算はどれくらいですか？'
+                utt = '商品の説明。ご予算はどれくらいですか？'
             elif self.is_no(usr_utt):
                 utt = 'そうですか、ごゆっくりどうぞ'
             else:
