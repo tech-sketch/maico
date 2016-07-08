@@ -137,7 +137,7 @@ class Dialog(tornado.web.RequestHandler):
         if sys_utt['utt'] == 'pass':
             observers.notify_msg(msg={'action': 'change_operator', 'data': sys_utt['utt']})
             Bot.in_manual_dialog = True
-            return self.write(json.dumps({'utt': ''}))
+            return self.write(json.dumps({'utt': '少々お待ち下さいね'}))
         else:
             observers.notify_msg(msg={'action': 'system_utt', 'data': sys_utt['utt']})
             return self.write(json.dumps(sys_utt))

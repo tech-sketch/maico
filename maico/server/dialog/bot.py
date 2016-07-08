@@ -1,4 +1,23 @@
 import pickle
+import re
+
+
+def matches_money(text):
+    pattern = r"\d+円|\d+千円|\d+万円|\d+えん|\d+せんえん|\d+まんえん"
+    matchOB = re.search(pattern, text)
+    return True if matchOB else False
+
+
+def is_yes(text):
+    pattern = r'はい|お願い'
+    matchOB = re.search(pattern, text)
+    return True if matchOB else False
+
+
+def is_no(text):
+    pattern = r'いいえ|ない|ありません'
+    matchOB = re.search(pattern, text)
+    return True if matchOB else False
 
 
 class Bot(object):
@@ -9,36 +28,30 @@ class Bot(object):
         self.state = 0
         self.file_name = 'state.pkl'
 
-    def is_yes(self, utt):
-        return 'はい' in utt
-
-    def is_no(self, utt):
-        return 'いいえ' in utt
-
     def generate_response(self, usr_utt):
         if self.state == 0:
-            if self.is_yes(usr_utt):
-                utt = '商品の説明。ご予算はどれくらいですか？'
-            elif self.is_no(usr_utt):
+            if is_yes(usr_utt):
+                utt = 'パソコンAはお買い得なお値段です。パソコンBは性能が非常に高いです。パソコンCはデザインに優れています。ちなみにご予算はどれくらいですか？'
+            elif is_no(usr_utt):
                 utt = 'そうですか、ごゆっくりどうぞ'
             else:
                 utt = 'pass'
         elif self.state == 1:
-            if self.is_yes(usr_utt):
-                utt = '動画や音楽の作成に使用する予定はありますか？'
+            if matches_money(usr_utt):
+                utt = 'なるほど、それでは動画や音楽の作成に使用する予定はありますか？'
             else:
                 utt = 'pass'
         elif self.state == 2:
-            if self.is_yes(usr_utt):
-                utt = 'パソコンのセットアップはおひとりでできそうですか？'
-            elif self.is_no(usr_utt):
-                utt = 'パソコンのセットアップはおひとりでできそうですか？'
+            if is_yes(usr_utt):
+                utt = 'なるほど、それではパソコンのセットアップはおひとりでできそうですか？'
+            elif is_no(usr_utt):
+                utt = 'なるほど、それではパソコンのセットアップはおひとりでできそうですか？'
             else:
                 utt = 'pass'
         elif self.state == 3:
-            if self.is_yes(usr_utt):
+            if is_yes(usr_utt):
                 utt = 'それでしたらこちらのパソコンAをおすすめします。'
-            elif self.is_no(usr_utt):
+            elif is_no(usr_utt):
                 utt = 'それでしたらこちらのパソコンBをおすすめします。'
             else:
                 utt = 'pass'
