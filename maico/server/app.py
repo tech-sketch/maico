@@ -87,6 +87,8 @@ class Observation(tornado.websocket.WebSocketHandler):
         elif 'feature' in message_d:
             TrainingHandler.model = self.model
             person_id = message_d['_id']
+            if person_id not in self.sensing_data and Bot.in_automatic_dialog == False:
+                self.send_to_robot(action='robot_talk', data=urllib.parse.quote('いらっしゃいませー'))
             self.sensing_data[person_id].append(message_d)
             predicted = json.loads(TrainingHandler.predict(message))
             message = {'action': 'update_chart',
