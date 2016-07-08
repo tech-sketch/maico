@@ -13,9 +13,9 @@ from maico.model.first_action.model import FirstActionModel, FirstActionHandMode
 TRAINING_FILE = os.path.join(os.path.dirname(__file__), "./tests/data/run_training.txt")
 
 
-define("mode", default="S", help="mode: S is server, K is sensing (kinect monitor)")
-define("server", default="ws://localhost:80/observation", help="websocket url to server")
-define("trainer", default="ws://localhost:8080/receive", help="websocket url to training server")
+define("mode", default="U", help="mode: U is user interface server, S is sensing (kinect monitor)")
+define("server", default="ws://localhost:8080/observation", help="websocket url to server")
+define("trainer", default="ws://localhost:8081/receive", help="websocket url to training server")
 define("training_file", default=TRAINING_FILE, help="training file path")
 
 
@@ -32,17 +32,17 @@ class SensingOneToMany():
 if __name__ == "__main__":
     tornado.options.parse_command_line()
     
-    if options.mode.upper() == "K":
+    if options.mode.upper() == "S":
         gui = KinectMonitor()
         logger = SensingOneToMany(options.server, options.trainer)
         gui.env.on_human_stream(logger.observe)
         gui.run()
     else:
         from maico.server.app import application
-        application.listen(80)
+        application.listen(8080)
 
         model = FirstActionHandModel()
         app = SensorMonitor(model, options.training_file)
-        app.listen(8080)
+        app.listen(8081)
         
         tornado.ioloop.IOLoop.current().start()
