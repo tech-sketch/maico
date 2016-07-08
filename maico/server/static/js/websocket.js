@@ -73,22 +73,13 @@ $('#connect2robot').on('click', function() {
 function add_text_to_chat(text, is_left) {
 
     if (is_left) {
-        /*var tag = '<div class="balloon-wrapper">' +
-                    '<img class="avator-img" src="static/images/robot_icon.png" style="float:left;"/>' +
-                    '<div class="balloon col s10" style="float:right;">' +
-                      '<div class="msg-container">' +
-                        text +
-                      '</div>' +
-                    '</div>' +
-                  '</div>';
-        */
         var tag = '<li class="left clearfix">' +
                     '<span class="chat-img pull-left">' +
                       '<img src="http://placehold.it/50/55C1E7/fff" alt="User Avatar" class="img-circle" />' +
                     '</span>' +
                     '<div class="chat-body clearfix">' +
                       '<div class="header">' +
-                        '<strong class="primary-font">Jack Sparrow</strong>' +
+                        '<strong class="primary-font">Customer</strong>' +
                         '<small class="pull-right text-muted"><i class="fa fa-clock-o fa-fw"></i></small>' +
                       '</div>' +
                       '<p>' +
@@ -98,16 +89,6 @@ function add_text_to_chat(text, is_left) {
                   '</li>';
     }
     else {
-    /*
-        var tag = '<div class="balloon-wrapper">' +
-                    '<div class="balloon col s10" style="float:left;">' +
-                      '<div class="msg-container">' +
-                        text +
-                      '</div>' +
-                    '</div>' +
-                    '<img class="avator-img" src="static/images/sayuri.png" style="float:right;"/>' +
-                  '</div>';
-    */
         var tag = '<li class="right clearfix">' +
                     '<span class="chat-img pull-right">' +
                       '<img src="http://placehold.it/50/FA6F57/fff" alt="User Avatar" class="img-circle" />' +
