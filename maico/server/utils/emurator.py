@@ -9,9 +9,6 @@ def on_message(ws, message):
     print(message)
     message = json.loads(message)
 
-
-#    ws.send(json.dumps(message))
-
 def on_error(ws, error):
     print(error)
 
@@ -26,17 +23,15 @@ def on_open(ws):
         import os
         import time
         from maico.server.utils.data_processor import SensingHandler
-        i = 1
         SENSING_FILE = os.path.join(os.path.dirname(__file__), "../../../tests/samples/sensing_protocol_samples.txt")
+        SENSING_FILE = os.path.join(os.path.dirname(__file__),
+                                    "../../../tests/samples/sensing_protocol_2person_samples.txt")
         SensingHandler.set_watch_file(SENSING_FILE)
 
         while True:
-            # d = random.random()
             ln = SensingHandler.file_read()
-            ws.send(json.dumps(ln))
-            # ws.send(json.dumps({'action': 'update_chart', 'data': {'year': i, 'value': d}}))
+            ws.send(ln)
             time.sleep(1)
-            # i += 1
 
     _thread.start_new_thread(run, ())
 

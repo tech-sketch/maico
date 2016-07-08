@@ -2,6 +2,7 @@ import json
 import os
 import time
 import urllib.parse
+from collections import defaultdict
 
 import tornado.escape
 import tornado.ioloop
@@ -47,8 +48,8 @@ class Observation(tornado.websocket.WebSocketHandler):
     """
     robots = set()
     browsers = set()
-    idx = 0
     model = FirstActionHandModel()
+    sensing_data = defaultdict(list)
 
     def open(self, *args, **kwargs):
         print('on open')
@@ -85,15 +86,20 @@ class Observation(tornado.websocket.WebSocketHandler):
                 self.send_to_robot(action='success_connection', data=data)
         elif 'feature' in message_d:
             TrainingHandler.model = self.model
-            predicted = json.loads(TrainingHandler.predict(message_d))
+            person_id = message_d['_id']
+            self.sensing_data[person_id].append(message_d)
+            predicted = json.loads(TrainingHandler.predict(message))
             message = {'action': 'update_chart',
-                       'data': {'value': round(predicted['prediction']['probability'], 3), 'time': self.idx}}
+                       'data': {'value': round(predicted['prediction']['probability'], 3),
+                                'time': message_d['timestamp'],
+                                'id': person_id,
+                                },
+                       }
             observers.notify_msg(message)
             if predicted['prediction']['execution'] and Bot.in_automatic_dialog == False:
                 self.send_to_robot(action='robot_talk', data=urllib.parse.quote('商品のご説明をしましょうか'))
                 observers.notify_msg(msg={'action': 'system_utt', 'data': '商品のご説明をしましょうか？'})
                 Bot.in_automatic_dialog = True
-            self.idx += 1
 
     def on_close(self):
         print('on close')

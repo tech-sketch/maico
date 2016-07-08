@@ -26,7 +26,16 @@ socket.onmessage = function(event) {
             chart_data.shift();
         }
         console.log(data['data']);
-        chart_data.push(data['data']);
+        /*chart_data.push(data['data']);
+        chart.setData(chart_data);*/
+        if (chart.options.ykeys.indexOf(data['data']['id']) == -1) {
+            chart.options.ykeys.push(data['data']['id']);
+            chart.options.labels.push(data['data']['id']);
+        }
+        var key = data['data']['id'];
+        var d = {time: data['data']['time']};
+        d[key] = data['data']['value'];
+        chart_data.push(d);
         chart.setData(chart_data);
     }
     else if (action == 'user_utt') {
@@ -113,29 +122,6 @@ function scrollBottom(targetId) {
     $(target).scrollTop(target.get(0).scrollHeight);
 }
 
-/*
-$('#submit_text').on('click', function() {
-    var text = $('#say_text').val();
-    var msg = {action: 'robot_talk', data: text};
-
-    $('#say_text').val('');
-    sendAction(msg);
-    add_text_to_chat(text, false);
-    scrollBottom('chat');
-})
-
-$('#say_text').keypress(function(e) {
-    if (e.which == 13) {
-        var text = $(this).val();
-        var msg = {action: 'robot_talk', data: text};
-
-        $(this).val('');
-        sendAction(msg);
-        add_text_to_chat(text, false);
-        scrollBottom('chat');
-    }
-})
-*/
 $('#btn-chat').on('click', function() {
     var text = $('#btn-input').val();
     var msg = {action: 'robot_talk', data: text};
