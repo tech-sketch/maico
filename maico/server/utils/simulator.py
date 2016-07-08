@@ -1,7 +1,7 @@
 import requests
 
-url = 'http://localhost:8888/dialog'
-data = {'utt': 'Hello'}
+url = 'http://localhost:8080/dialog'
+data = {'usr_utt': 'はい'}
 res = requests.post(url=url, json=data)
 print(res.content)
 print(res.cookies.get('session_id'))

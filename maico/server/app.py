@@ -1,7 +1,7 @@
 import json
 import os
-import pickle
 import time
+import urllib.parse
 
 import tornado.escape
 import tornado.ioloop
@@ -10,7 +10,8 @@ import tornado.websocket
 from tornado.options import define, options
 from tornado.web import url
 
-from maico.server.data_processor import FirstActionHandModel, TrainingHandler
+from maico.server.dialog.bot import Bot
+from maico.server.utils.data_processor import FirstActionHandModel, TrainingHandler
 
 define('debug', default=True, help='debug mode')
 
@@ -56,8 +57,6 @@ class Observation(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         message_d = tornado.escape.json_decode(message)
         print(message_d)
-        print(dir(message_d))
-        print(type(message_d))
         if 'action' in message_d and isinstance(message_d, dict):
             message = message_d
             action = message['action']
@@ -74,10 +73,7 @@ class Observation(tornado.websocket.WebSocketHandler):
                 # ここだけ情報の流れがPepper -> browser
                 _, _, b64_img, _ = data.split('||||')
                 observers.notify_msg({'action': 'pepper_eye', 'data': b64_img})
-                # for browser in self.browsers:
-                #   browser.write_message({'action': 'pepper_eye', 'data': b64_img})
             elif action == 'robot_talk':
-                import urllib.parse
                 self.send_to_robot(action='robot_talk', data=urllib.parse.quote(data))
             elif action == 'get_token':
                 self.send_to_robot(action='get_token', data=data)
@@ -89,14 +85,14 @@ class Observation(tornado.websocket.WebSocketHandler):
                 self.send_to_robot(action='success_connection', data=data)
         elif 'feature' in message_d:
             TrainingHandler.model = self.model
-            predicted = json.loads(TrainingHandler.predict(message))
-            print(predicted)
+            predicted = json.loads(TrainingHandler.predict(message_d))
             message = {'action': 'update_chart',
                        'data': {'value': round(predicted['prediction']['probability'], 3), 'time': self.idx}}
             observers.notify_msg(message)
-            if predicted['prediction']['execution']:
-                import urllib.parse
-                self.send_to_robot(action='robot_talk', data=urllib.parse.quote('\rspd=200\なまむぎなまごめなまたまご'))
+            if predicted['prediction']['execution'] and Bot.in_automatic_dialog == False:
+                self.send_to_robot(action='robot_talk', data=urllib.parse.quote('商品のご説明をしましょうか'))
+                observers.notify_msg(msg={'action': 'system_utt', 'data': '商品のご説明をしましょうか？'})
+                Bot.in_automatic_dialog = True
             self.idx += 1
 
     def on_close(self):
@@ -106,45 +102,6 @@ class Observation(tornado.websocket.WebSocketHandler):
     def send_to_robot(self, action, data):
         for robot in self.robots:
             robot.write_message({'action': action, 'data': data})
-
-
-class Bot(object):
-    def __init__(self):
-        self.state = 0
-        self.file_name = 'state.pkl'
-
-    def generate_response(self, usr_utt):
-        if self.state == 0:
-            utt = 'こんにちは'
-        elif self.state == 1:
-            utt = '私はボットです。'
-        elif self.state == 2:
-            utt = '状態を記憶しています。'
-        else:
-            utt = 'ありがとう'
-        self.state += 1
-        return {'utt': utt}
-
-    def read_states(self):
-        try:
-            with open(self.file_name, 'rb') as f:
-                states = pickle.load(f)
-        except FileNotFoundError as e:
-            print(e.strerror)
-            states = {}
-        except EOFError:
-            states = {}
-        return states
-
-    def read_state(self, session_id):
-        states = self.read_states()
-        self.state = states.get(session_id)
-
-    def write_state(self, session_id):
-        states = self.read_states()
-        states[session_id] = self.state
-        with open(self.file_name, 'wb') as f:
-            pickle.dump(states, f)
 
 
 class Dialog(tornado.web.RequestHandler):
@@ -172,10 +129,24 @@ class Dialog(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
         bot, session_id = self.create_or_read_bot()
         usr_utt = tornado.escape.json_decode(self.request.body.decode('utf-8'))
-        sys_utt = bot.generate_response(usr_utt)
-        bot.write_state(session_id)
         observers.notify_msg(msg={'action': 'user_utt', 'data': usr_utt['usr_utt']})
-        return self.write(json.dumps(sys_utt))
+        if Bot.in_manual_dialog:
+            return self.write(json.dumps({'utt': ''}))
+        sys_utt = bot.generate_response(usr_utt['usr_utt'])
+        bot.write_state(session_id)
+        if sys_utt['utt'] == 'pass':
+            observers.notify_msg(msg={'action': 'change_operator', 'data': sys_utt['utt']})
+            Bot.in_manual_dialog = True
+            return self.write(json.dumps({'utt': '少々お待ち下さいね'}))
+        else:
+            observers.notify_msg(msg={'action': 'system_utt', 'data': sys_utt['utt']})
+            return self.write(json.dumps(sys_utt))
+
+
+class Reset(tornado.web.RequestHandler):
+    def post(self, *args, **kwargs):
+        Bot.in_manual_dialog = False
+        Bot.in_automatic_dialog = False
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -188,6 +159,7 @@ application = tornado.web.Application([
     url(r'/', Index, name='index'),
     url(r'/observation', Observation),
     url(r'/dialog', Dialog),
+    url(r'/reset', Reset),
 ],
     **settings
 )
