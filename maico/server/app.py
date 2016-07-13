@@ -20,7 +20,7 @@ define('debug', default=True, help='debug mode')
 class Index(tornado.web.RequestHandler):
 
     def get(self, *args, **kwargs):
-        return self.render('index2.html')
+        return self.render('index.html')
 
 
 class Observers(object):
