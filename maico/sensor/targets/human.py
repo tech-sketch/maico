@@ -47,7 +47,7 @@ class Joint(Target):
     
     @classmethod
     def map_from_kinect_joints(self, joints, joint_points):
-        m_joints = []
+        m_joints = {}
         for i in range(JointType_Count):
             mj = Joint()
             j = joints[i]
@@ -69,7 +69,7 @@ class Joint(Target):
             mj.x_2d = joint_points[i].x
             mj.y_2d = joint_points[i].y
             
-            m_joints.append(mj)
+            m_joints[i] = mj
 
         return m_joints
     
