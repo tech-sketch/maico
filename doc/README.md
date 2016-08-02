@@ -65,9 +65,7 @@ actionの種類
 * welcome: いらっしゃいませ
 * one to many: 呼び込みモードの実行
 * call: one to one に引き込むために声をかける
-* engage: 対話モードを開始する/維持する
 * one to one(auto): 自動応対モードの実行
-* take over: 人での応対に切り替える
 * one to one(manual): VRを利用した人による応対の開始
 * terminate: one to oneを終了し、one to manyに遷移する
 
