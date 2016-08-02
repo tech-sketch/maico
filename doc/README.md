@@ -22,6 +22,7 @@
  * One to Oneモードの時に対話の管理を行うシステム
 * Robot(Pepper)
  * operation protocolに則り、発話やジェスチャーなどの行動を行う
+ * Robot側にadapterを用意し、adapterはprotocolを解釈してRobotに適切な動作を行わせる
  * ユーザーから得られた反応などを、sensing protocolにまとめWeb systemに送信する
 
 **protocols**
@@ -33,14 +34,19 @@
  * feature{}: センサーで検知した情報を格納したディクショナリ
  * feature.__type__: 検知したオブジェクトのPythonクラス型情報
  * feature.attributes：検知したオブジェクトの観測情報(key/value)
-* action protocol
+* learning protocol
+ * sensing protocolを内包する
+ * prediction
+ * feedback
+* action protocol(仕様未定)
  * shop_id: お店のid
  * target_id: ターゲットのid
  * state: state modelから得られた、状態を表す離散値
  * action: action modelから得られた、行動を表す離散値
  * reward: 行動によって得られる報酬の見込み値
 * operation protocol
- * sensor_id: 指示対象のsensorのid
+ * sensor_id: 指示対象（Robot）のsensorのid
+ * action: 下記のactionの種類を指定
  * operation: name/valueのdictionary
  * operation/utterance: 発話文
  * operation/gesture: ジェスチャー
@@ -57,10 +63,13 @@ stateの種類
 actionの種類
 
 * welcome: いらっしゃいませ
-* routine: 適当な宣伝文句
-* call: 声をかける(one to many)
-* engage: 対話モードを開始する/維持する->以後は、フレームベースの対話管理に遷移
-* terminate: 対話を打ち切る
+* one to many: 呼び込みモードの実行
+* call: one to one に引き込むために声をかける
+* engage: 対話モードを開始する/維持する
+* one to one(auto): 自動応対モードの実行
+* take over: 人での応対に切り替える
+* one to one(manual): VRを利用した人による応対の開始
+* terminate: one to oneを終了し、one to manyに遷移する
 
 
 **Models**
