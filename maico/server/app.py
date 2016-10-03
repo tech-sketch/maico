@@ -11,7 +11,7 @@ import tornado.websocket
 from tornado.options import define, options
 from tornado.web import url
 
-from maico.server.dialog.bot import Bot
+from maico.server.dialogue_system.bot import Bot
 from maico.server.utils.data_processor import FirstActionHandModel, TrainingHandler
 
 define('debug', default=True, help='debug mode')
@@ -99,8 +99,9 @@ class Observation(tornado.websocket.WebSocketHandler):
                        }
             observers.notify_msg(message)
             if predicted['prediction']['execution'] and Bot.in_automatic_dialog == False:
-                self.send_to_robot(action='robot_talk', data=urllib.parse.quote('商品のご説明をしましょうか'))
-                observers.notify_msg(msg={'action': 'system_utt', 'data': '商品のご説明をしましょうか？'})
+                msg = '時期はいつ頃とかありますか？'
+                self.send_to_robot(action='robot_talk', data=urllib.parse.quote(msg))
+                observers.notify_msg(msg={'action': 'system_utt', 'data': msg})
                 Bot.in_automatic_dialog = True
 
     def on_close(self):
@@ -124,7 +125,9 @@ class Dialog(tornado.web.RequestHandler):
 
     def create_or_read_bot(self):
         bot = Bot()
-
+        session_id = str(time.time())
+        return bot, session_id
+        """
         if not self.get_cookie(self.cookie_name):
             sessioin_id = str(time.time())
             self.set_cookie(self.cookie_name, sessioin_id)
@@ -133,15 +136,18 @@ class Dialog(tornado.web.RequestHandler):
             self.set_cookie(self.cookie_name, sessioin_id)
             bot.read_state(sessioin_id)
         return bot, sessioin_id
+        """
+
+    bot = Bot()
 
     def post(self, *args, **kwargs):
-        bot, session_id = self.create_or_read_bot()
+        # bot, session_id = self.create_or_read_bot()
         usr_utt = tornado.escape.json_decode(self.request.body.decode('utf-8'))
         observers.notify_msg(msg={'action': 'user_utt', 'data': usr_utt['usr_utt']})
         if Bot.in_manual_dialog:
             return self.write(json.dumps({'utt': ''}))
-        sys_utt = bot.generate_response(usr_utt['usr_utt'])
-        bot.write_state(session_id)
+        sys_utt = self.bot.reply(usr_utt['usr_utt'])
+        #bot.write_state(session_id)
         if sys_utt['utt'] == 'pass':
             observers.notify_msg(msg={'action': 'change_operator', 'data': sys_utt['utt']})
             Bot.in_manual_dialog = True
