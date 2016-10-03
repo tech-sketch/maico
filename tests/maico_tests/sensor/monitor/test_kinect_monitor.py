@@ -12,7 +12,7 @@ def handle_stream(stream):
         else:
             print("Human {0} disappered.".format(human._id))
 
-    stream.subscribe(show_human).subscribe(wt)
+    stream.subscribe(show_human)
 
 
 def main():

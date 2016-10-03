@@ -30,7 +30,7 @@ class Human(Target):
             z = (rl[0].z + rl[1].z) / 2
             return x, y, z
         else:
-            return (0, 0, 0)
+            return 0, 0, 0
 
 
 class Joint(Target):
@@ -47,7 +47,7 @@ class Joint(Target):
     
     @classmethod
     def map_from_kinect_joints(self, joints, joint_points):
-        m_joints = []
+        m_joints = {}
         for i in range(JointType_Count):
             mj = Joint()
             j = joints[i]
@@ -69,7 +69,7 @@ class Joint(Target):
             mj.x_2d = joint_points[i].x
             mj.y_2d = joint_points[i].y
             
-            m_joints.append(mj)
+            m_joints[i] = mj
 
         return m_joints
     
@@ -78,12 +78,16 @@ class Joint(Target):
         tracked = True
         low_confidence = 0
         for jp in joint_parts:
-            j = joints[jp]
-            if not j.is_tracked:
+            if jp not in joints:
                 tracked = False
                 break
-            elif not j.is_accurate:
-                low_confidence += 1
+            else:
+                j = joints[jp]
+                if not j.is_tracked:
+                    tracked = False
+                    break
+                elif not j.is_accurate:
+                    low_confidence += 1
         
         if len(joint_parts) == low_confidence:
             tracked = False

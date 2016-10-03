@@ -20,7 +20,7 @@ define('debug', default=True, help='debug mode')
 class Index(tornado.web.RequestHandler):
 
     def get(self, *args, **kwargs):
-        return self.render('index2.html')
+        return self.render('index.html')
 
 
 class Observers(object):
@@ -48,8 +48,7 @@ class Observation(tornado.websocket.WebSocketHandler):
     """
     robots = set()
     browsers = set()
-    model = FirstActionHandModel()
-    sensing_data = defaultdict(list)
+    models = {}
 
     def open(self, *args, **kwargs):
         print('on open')
@@ -85,16 +84,21 @@ class Observation(tornado.websocket.WebSocketHandler):
             elif action == 'send_access_token':
                 self.send_to_robot(action='success_connection', data=data)
         elif 'feature' in message_d:
-            TrainingHandler.model = self.model
-            person_id = message_d['_id']
-            if person_id not in self.sensing_data and Bot.in_automatic_dialog == False:
-                self.send_to_robot(action='robot_talk', data=urllib.parse.quote('いらっしゃいませー'))
-            self.sensing_data[person_id].append(message_d)
+            target_id = message_d['_id']
+
+            if target_id not in self.models:
+                if Bot.in_automatic_dialog == False:
+                    self.send_to_robot(action='robot_talk', data=urllib.parse.quote('いらっしゃいませー'))
+                self.models[target_id] = FirstActionHandModel()
+
+            model = self.models[target_id]
+            # self.sensing_data[target_id].append(message_d)  # do not need to store the sensing datas. it consume the memory
+            TrainingHandler.model = model  # it is dirty way. must implements predict method in this handler
             predicted = json.loads(TrainingHandler.predict(message))
             message = {'action': 'update_chart',
                        'data': {'value': round(predicted['prediction']['probability'], 3),
                                 'time': message_d['timestamp'],
-                                'id': person_id,
+                                'id': target_id,
                                 },
                        }
             observers.notify_msg(message)

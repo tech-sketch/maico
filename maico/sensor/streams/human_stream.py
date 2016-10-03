@@ -6,23 +6,31 @@ from maico.sensor.targets.human_feature import MoveFeature, MoveStatistics
 
 class MoveStream(Accumulator):
 
-    def __init__(self, human_stream, frame_count, sec_per_frame, move_threshold=0.1, shift=0):
+    def __init__(self, human_stream, frame_count, frame_per_sec, move_threshold=0.1, shift=0):
         super(MoveStream, self).__init__(human_stream, frame_count, shift)
-        self._sec_per_frame = sec_per_frame
+        self._frame_per_sec = frame_per_sec
         self._move_threshold = move_threshold
 
     def accumulate(self):
-        locations = [h.location() for h in self.queue]
-        locations = [lc for lc in locations if sum(lc) != 0]
+        locations = list(filter(lambda lc: sum(lc) != 0, [h.location() for h in self.queue]))
+        
+        # move parameters
+        seconds = self.size / self._frame_per_sec
+        distance = 0.0
+        movement = 0.0
+        speed = 0.0
+        location = []
 
-        mean = np.mean(locations, axis=0)
+        if len(locations) > 0:
+            # see detail about kinect coordinate
+            # https://msdn.microsoft.com/ja-jp/library/dn785530.aspx
+            mean = np.mean(locations, axis=0)
+            distance = mean[-1]  # z axis, distance from kinect
+            location = list(mean)
 
-        # see detail about kinect coordinate
-        # https://msdn.microsoft.com/ja-jp/library/dn785530.aspx
-        distance = mean[-1]  # distance from kinect
-        seconds = self.size / self._sec_per_frame
-        movement = np.linalg.norm(np.array(locations[-1]) - np.array(locations[0]))
-        speed = movement / seconds  # meter / second 
+            if len(locations) >= 2:  # two locations must be needed to calculate movement
+                movement = np.linalg.norm(np.array(locations[-1]) - np.array(locations[0]))
+                speed = movement / seconds  # meter / second
 
         # set property
         feature = MoveFeature(
@@ -30,7 +38,7 @@ class MoveStream(Accumulator):
             distance=distance,
             moving_speed=speed,
             moving_time=seconds if speed > self._move_threshold else 0,
-            location=list(mean)
+            location=location
             )
         return feature
 

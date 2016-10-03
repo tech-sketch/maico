@@ -3,7 +3,7 @@ import re
 
 
 def matches_money(text):
-    pattern = r"\d+円|\d+千円|\d+万円|\d+えん|\d+せんえん|\d+まんえん"
+    pattern = r"じゅう|\d+|\d+円|\d+千円|\d+万円|\d+えん|\d+せんえん|\d+まんえん"
     matchOB = re.search(pattern, text)
     return True if matchOB else False
 
